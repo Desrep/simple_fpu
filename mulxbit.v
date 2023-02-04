@@ -13,6 +13,7 @@
    limitations under the License.
 */
 
+// fixed point multiplier
 
 module mulxbit(in1,in2,out,done);
   parameter WIDTH = 24;
@@ -32,7 +33,7 @@ module mulxbit(in1,in2,out,done);
 
  always @*
    begin
-     for(i= 0; i<WIDTH/4;i=i+1) begin
+     for(i= 0; i<WIDTH/4;i=i+1) begin // perform the shifts required
        if( in2[i] == 1'b1)
          partprod0[i] = (temp<<i);
        if(in2[i+(WIDTH/4)]==1'b1)
@@ -53,7 +54,7 @@ module mulxbit(in1,in2,out,done);
    end
 
 
-always @* begin
+always @* begin // perform the sums
   out0=0;
   done0 = 0;
   for(i = 0;i<WIDTH/6;i= i+1) begin
