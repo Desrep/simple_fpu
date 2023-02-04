@@ -17,7 +17,7 @@ so the number of registers would be STAGES-1 and every combinational part would 
 You could use this to try and fix hold violations primarily, or setup violations, but the delay won't be modified considerably, this would be just a way to make         the error messages go away.
                               
 ## fp_sqr.v
-Very similar to the division file, the sqrt.v code uses an iterative non restoring algorithm to calculate the fraction square root in fixed point, the number of stages can also be controlled in a similar way to the division file.
+Very similar to the division file, the sqrt.v code uses an iterative restoring algorithm to calculate the fraction square root in fixed point, the number of stages can also be controlled in a similar way to the division file.
 ## fp_compare.v 
 A regular part-by-part comparison of floating point numbers.
     
