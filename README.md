@@ -21,7 +21,7 @@ Very similar to the division file, the sqrt.v code uses an iterative restoring a
 ## fp_compare.v 
 A regular part-by-part comparison of floating point numbers.
 
-#Simulation
+## Simulation
 This link can be used to simulate the code
 https://www.edaplayground.com/x/DE5Z
     
