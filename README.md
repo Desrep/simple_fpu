@@ -20,4 +20,8 @@ You could use this to try and fix hold violations primarily, or setup violations
 Very similar to the division file, the sqrt.v code uses an iterative restoring algorithm to calculate the fraction square root in fixed point, the number of stages can also be controlled in a similar way to the division file.
 ## fp_compare.v 
 A regular part-by-part comparison of floating point numbers.
+
+#Simulation
+This link can be used to simulate the code
+https://www.edaplayground.com/x/DE5Z
     
