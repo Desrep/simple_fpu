@@ -11,11 +11,11 @@ Floating point division unit, the fixed point division file divide_r.v uses subt
 + divide_r.v 
        In this file you can use the STAGES parameter to modify the number of registerin stages of the algorithm, if you make it 3, for example, the result would be an
        architecture like.
-                      * COMBINATIONAL_PART
-                      *     register
-                      * COMBINATIONAL_PART
-                      *     register
-                      * COMBINATIONAL_PART
+* COMBINATIONAL_PART
+*     register
+* COMBINATIONAL_PART
+*     register
+* COMBINATIONAL_PART
          so the number of registers would be STAGES-1
          You could use this to try and fix hold violations primarily, or setup violations, but the delay won't be modified considerably, this would be just a way to make         the error messages go away.
                               
