@@ -25,6 +25,7 @@ module fp_comp(in1,in2,eq,great,less,act,done,clk,rst,inv);
   wire [M:0] M1,M2;
   wire S1,S2;
   reg ov_f,un_f,done_f,inv_f,inexact_f,less_f,eq_f,great_f; //forward exception variables
+  reg eq_f_c,great_f_c,less_f_c,done_f_c,inv_f_c,forward_c;
   reg forward;
   
   assign  E1  = in1[E:M+1];
@@ -38,11 +39,11 @@ module fp_comp(in1,in2,eq,great,less,act,done,clk,rst,inv);
   
  always @* begin
     if((in1 == `FP_NANS)||(in2 == `FP_NANS))
-        {less_f_c,eq_f_c,great_f_c,done_f_c,inv_f_c,forward_c} <= {0,0,0,1'b1,1'b1,1'b1};
+        {less_f_c,eq_f_c,great_f_c,done_f_c,inv_f_c,forward_c} = {0,0,0,1'b1,1'b1,1'b1};
       else  if( ((in1==`FP_ZEROP)&&(in2==`FP_ZERON))||((in1==`FP_ZERON)&&(in2==`FP_ZEROP)))
-       {less_f_c,eq_f_c,great_f_c,done_f_c,inv_f_c,forward_c} <= {1'b0,1'b1,1'b0,1'b1,1'b1,1'b1};
+       {less_f_c,eq_f_c,great_f_c,done_f_c,inv_f_c,forward_c} = {1'b0,1'b1,1'b0,1'b1,1'b1,1'b1};
       else if( (in1 == `FP_INFP) || (in2 == `FP_INFP) || (in1 == `FP_INFN) || (in2 == `FP_INFN)) 
-       {less_f_c,eq_f_c,great_f_c,done_f_c,inv_f_c,forward_c} <= {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1};
+      {less_f_c,eq_f_c,great_f_c,done_f_c,inv_f_c,forward_c} = {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1};
   	  else
         forward_c = ~rst;
   end
