@@ -14,6 +14,7 @@
 */
 // fp multiplication of 2 32 bit fp numbers
 // 5 rounding modes implemented
+`include "special_characters.v"
 module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -46,7 +47,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   wire done0;
   reg done0_reg,done1;
   wire S1,S2,S0;
-  reg   [E-M-1:0] B = 127;
+  parameter B = 127;
   integer i;
 
   //initialize values
@@ -80,7 +81,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
       	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,0,0,1'b1,1'b0,1'b0,1'b1};
      end
      else
-	 forward_c = ~rst;
+	     {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,0,0,1'b1,1'b0,1'b0,~rst};
   end
   
   
@@ -121,7 +122,8 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
     always @*
     begin // normalize to scientific notation and standard
       M01 = M000;
-      E0 = E2+E1-B; // calculate exponent
+      E0 = E2+E1;
+      E0=E0-B; // calculate exponent
       t = |M01[M-1:0]; // sticky  
       if(M000[2*M+3] == 1'b1) begin
            M01 = M01 >> 1;
@@ -169,6 +171,10 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
            Mround = next_number[M:0];
            Eround = next_number[E:M+1];
         end 
+	default:begin
+	  Mround = M01[2*M+1:M+1];
+          Eround = E0;
+	end
       endcase
     end
     
@@ -185,7 +191,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
       end 
     end
 
-    else if(round_m == `RNa) begin //RN ties to away
+    else  begin //RN ties to away
       case ({g,t})
         2'b00: begin
           Mround = M01[2*M+1:M+1];
@@ -203,6 +209,10 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
            Mround = next_number[M:0];
            Eround = next_number[E:M+1];
         end 
+	default:begin
+          Mround = M01[2*M+1:M+1];
+          Eround = E0;
+	end
       endcase
     end
     

@@ -14,7 +14,8 @@
 */
 // FP add for 32 bit numbers
 //5 rounding modes implemented
-module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
+`include "special_characters.v"
+module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,enable,inv,inexact);
   parameter W = 32;
   parameter M = 22;
   parameter E = 30;
@@ -23,11 +24,12 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   input [W-1:0] in1;
   input [W-1:0] in2;
   input [2:0] round_m;
-  input clk,rst,act;
+  input clk,rst,enable;
   output reg [W-1:0] out;
   output reg ov,un,done,inv,inexact;
   wire [E-M-1:0] E1,E2;
-  reg [E-M-1:0] E0,E02,E002,E10,E20,Eround;
+  reg [E-M-1:0] E0,E02,E002,E10,E20;
+  reg [E-M-1:0] Eround;
   reg [M+3:0] M1,M2,M10,M20,Mtemp;
   reg  [M+4:0] M00,M01,M000; //extra bit accounts for carry
   reg [M:0] M0;
@@ -35,7 +37,8 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   reg ov_f,un_f,done_f,inv_f,inexact_f; //forward exception variables\
   reg ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c; //forward exception variables
   reg [W-1:0] out_f,out_f_c;
-  reg forward,forward_c;
+  reg forward;
+  reg forward_c;
   reg ov0,un0,inexact0,t,l,g,tmerge;
   wire S1,S2;
   reg S0,S00;
@@ -84,7 +87,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
        		 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b1};
 
        else
-         forward_c = 0;
+	      {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b0};
   end
   
   
@@ -170,11 +173,14 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
     end
   
  
- always @(posedge clk or negedge rst) begin
+ always @(posedge clk or negedge rst) begin // register with enable
  	if(!rst)
     {M000,done0_r} <= {0,0};
-   	else
-    {M000,done0_r} <= {M00,done0};
+	else begin
+	  if(enable) begin
+	    {M000,done0_r} <= {M00,done0};
+	             end
+	    end
  end
 
 
@@ -232,7 +238,12 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         2'b11:begin
            M0 = next_number[M:0];
            Eround = next_number[E:M+1];
-        end 
+        end
+        default:begin
+     	  M0 = M01[M+2:2];
+          Eround = E0;
+
+	end	
       endcase
     end
     
@@ -247,7 +258,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
       end
     end
 
-    else if(round_m == `RNa) begin //RN ties to away
+    else  begin //RN ties to away
       case ({g,tmerge})
         2'b00: begin
           M0 = M01[M+2:2];
@@ -264,7 +275,11 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         2'b11:begin
            M0 = next_number[M:0];
            Eround = next_number[E:M+1];
-        end 
+        end
+	default:begin
+          M0 = M01[M+2:2];
+          Eround = E0;
+	end	
       endcase
     end
     

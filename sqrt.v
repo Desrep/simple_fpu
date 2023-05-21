@@ -16,8 +16,8 @@
 // Restoring algorithm
 // Remainder is positive since it's a restoring algorithm
 module sqrt(in,out,sticky,clk,rst,done);
-  parameter WIDTH = 8;
-  parameter STAGES = 9; // control the number of pipeline stages
+  parameter WIDTH = 26;
+  parameter STAGES = 3; // control the number of pipeline stages
   input [WIDTH-1:0] in;
   input rst,clk;
   output reg sticky;

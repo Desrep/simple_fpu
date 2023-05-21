@@ -16,6 +16,7 @@
 //pipelined fp multiplier, supports 2 of the 2 rounding modes truncate and round to nearest (even on tie)
 // fp multiplication of 2 32 bit fp numbers
 //5 rounding modes implemented
+`include "special_characters.v"
 module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -62,7 +63,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
        else if((in1 == `FP_INFP))
       	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,1'b1,1'b0,1'b1,1'b0,1'b0,1'b1};
        else
-	   forward_c = 0;
+	  {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,1'b1,1'b0,1'b1,1'b0,1'b0,1'b0};
  end
   
   
@@ -94,7 +95,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   //calculate exponent
 
    
-  sqrt #(.WIDTH(M+3+1)) sq (.in({1'b0,M1}),.out(M0r),.sticky(t),.clk(clk),.rst(rst),.done(done0)); // add one more bit than the Width to be able to perform the arithmetic inside sqrt
+  sqrt sq (.in({1'b0,M1}),.out(M0r),.sticky(t),.clk(clk),.rst(rst),.done(done0)); // add one more bit than the Width to be able to perform the arithmetic inside sqrt
  
   always @(posedge clk or negedge rst) begin// pipeline?????
 	if(!rst)
@@ -148,6 +149,10 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
            M0 = next_number[M:0];
            Eround = next_number[E:M+1];
         end 
+	default:begin
+          M0 = M01[M+2:2];
+          Eround = E0;
+	end
       endcase
     end
     
@@ -163,7 +168,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
     end
     
 
-    else if(round_m == `RNa) begin //RN ties to away
+    else begin //RN ties to away
       case ({g,t})
         2'b00: begin
           M0 = M01[M+2:2];
@@ -181,6 +186,10 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
            M0 = next_number[M:0];
            Eround = next_number[E:M+1];
         end 
+	default:begin
+          M0 = M01[M+2:2];
+          Eround = E0;
+	end
       endcase
         end
     

@@ -16,6 +16,7 @@
 //only truncates// no pipeline for now
 // fp division 2 32 bit fp numbers
 //5 rounding modes implemented
+`include "special_characters.v"
 module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -46,7 +47,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   reg [1:0] gr; // guard and round bits
   reg sticky; // sticky bit
   wire S1,S2,S0;
-  reg   [E-M-1:0] B = 127;
+  parameter B = 127;
   integer i;
   
   
@@ -94,8 +95,8 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
      else if((in1 == `FP_NANS)||(in2 == `FP_NANS))
     	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b0,1'b1};
      else
-	 forward_c = ~rst;
-  end
+         {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b0,~rst};
+     end
   
   
   always @(posedge clk or negedge rst) begin // calculate forward exceptions
@@ -139,15 +140,17 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   //calculate exponent
   always @* begin
     if(Ef1>Ef2) begin
-    E01 = Ef1-Ef2+B;
+    E01 = Ef1-Ef2;
+    E01 =E01+B;
     
     end
     else begin
-      E01 = B-(Ef2-Ef1);
+      E01 = Ef2-Ef1;	    
+      E01 = B-E01;
     end
   end
    
-  divide_r #(.WIDTH(M+4)) div1 (.num(Mf1),.den(Mf2),.quot(M0r),.sticky(tdiv),.clk(clk),.rst(rst),.done(done0));
+  divide_r  div1 (.num(Mf1),.den(Mf2),.quot(M0r),.sticky(tdiv),.clk(clk),.rst(rst),.done(done0));
  
   always @(posedge clk or negedge rst) begin
   	if(!rst)
@@ -209,7 +212,11 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
         2'b11:begin
            M0 = next_number[M:0];
            Eround = next_number[E:M+1];
-        end 
+        end
+	default:begin
+	  M0 = M01[M+2:2];
+          Eround = E0;
+	end	
       endcase
     end
     
@@ -224,7 +231,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
       end
     end
 
-    else if(round_m == `RNa) begin //RN ties to away
+    else  begin //RN ties to away
       case ({g,tmerge})
         2'b00: begin
           M0 = M01[M+2:2];
@@ -242,6 +249,10 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
            M0 = next_number[M:0];
            Eround = next_number[E:M+1];
         end 
+	default:begin
+          M0 = M01[M+2:2];
+          Eround = E0;
+	end
       endcase
     end
   ///////////////////////////////////////////////////////////////////// inexact flag calculation

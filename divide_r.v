@@ -16,8 +16,8 @@
 // num <= den
 // since it's restoring the remainder is positive
 module divide_r(num,den,quot,remo,sticky,clk,rst,done);
-  parameter WIDTH = 8;
-  parameter STAGES = 12;
+  parameter WIDTH = 26;
+  parameter STAGES = 2;
   input [WIDTH-1:0] num,den;
   input clk;
   input rst;
