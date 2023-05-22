@@ -5,7 +5,7 @@ module top_tb();
   logic [WIDTH-1:0] in1,in2,out;
   logic [2:0] round_m;
  
-  logic ov,un,clk,rst,eq,great,less,act,done,inv,enable_add,power_off_add,retain_add;
+  logic ov,un,clk,rst,eq,great,less,act,done,inv,enable_add,power_off_add,retain_add,isolate_add;
   logic [2:0] op;
   //-1.35
   
@@ -14,6 +14,7 @@ module top_tb();
     enable_add= 1'b1;
     retain_add = 1'b1;
     power_off_add = 1'b0;
+    isolate_add = 1'b0;
     round_m = 3'b001;
     act = 1;
     rst = 1;
@@ -72,7 +73,7 @@ module top_tb();
 
 
   
-  fpu  fpu1(.retain_add(retain_add),.in1p(in1),.power_off_add(power_off_add),.enable_add(enable_add),.in2p(in2),.out(out),.ov(ov),.un(un),.opcode(op),.clk(clk),.rstp(rst),.eq(eq),.great(great),.less(less),.round_mp(round_m),.act(act),.done(done),.inv(inv));
+  fpu  fpu1(.isolate_add(isolate_add),.retain_add(retain_add),.in1p(in1),.power_off_add(power_off_add),.enable_add(enable_add),.in2p(in2),.out(out),.ov(ov),.un(un),.opcode(op),.clk(clk),.rstp(rst),.eq(eq),.great(great),.less(less),.round_mp(round_m),.act(act),.done(done),.inv(inv));
   
   
   

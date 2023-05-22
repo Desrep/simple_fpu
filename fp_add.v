@@ -304,7 +304,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,enable,inv,inexact);
   
   always @(posedge clk or negedge rst) begin // output values
       if (!rst)
-     	 {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {0,0,0,1'b0,1'b0,1'b1,1'b0,1'b0};
+     	 {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {0,0,0,1'b0,1'b0,1'b0,1'b0,1'b0};
       else begin
         if(!forward)
         {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {S0,Eround,M0,ov0,un0,done1,1'b0,inexact0};
