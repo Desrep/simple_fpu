@@ -25,7 +25,7 @@ module fpu(
 
 input [31:0] in1p,in2p,
  input clk,
- input rstp,act,
+ input rstp,act,power_off_add,retain_add,isolate_add,
  input enable_add,enable_mul,enable_sqr,enable_div,enable_comp,
  input [2:0] round_mp, // rounding mode selector
 output reg [31:0] out,
@@ -185,6 +185,9 @@ always @* begin
     done0 = adone;
     rsta = rstp;
     rstc = 0;
+    rstd = 0;
+    rstm = 0;
+    rsts = 0;
     in1pa = in1p;
     in2pa = in2p;
     in1pm = 0;
