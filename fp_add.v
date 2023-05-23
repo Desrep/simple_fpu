@@ -309,7 +309,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,enable,inv,inexact);
         if(!forward)
         {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {S0,Eround,M0,ov0,un0,done1,1'b0,inexact0};
         else
-        {out_f,ov,un,done,inv,inexact} <= {out_f,ov_f,un_f,done_f,inv_f,inexact_f};
+        {out,ov,un,done,inv,inexact} <= {out_f,ov_f,un_f,done_f,inv_f,inexact_f};
       end
    
   end
