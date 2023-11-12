@@ -20,6 +20,9 @@ You could use this to try and fix hold violations primarily, or setup violations
 Very similar to the division file, the sqrt.v code uses an iterative restoring algorithm to calculate the fraction square root in fixed point, the number of stages can also be controlled in a similar way to the division file.
 ## fp_compare.v 
 A regular part-by-part comparison of floating point numbers.
+## rounding modes
+The rounding modes are defined in the special_characters file. Selected by round_mp in the top module (fpu.v).
+Adapting (or creating from scratch) the top module shouldn't be a prolem, this top module is basically a place holder if you want to test the design right away.
 
 ## Simulation
 This link can be used to simulate the code
