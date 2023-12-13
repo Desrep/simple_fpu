@@ -22,18 +22,18 @@ module mulxbit(in1,in2,out,done);
   output reg done;
   reg [2*WIDTH-1:0] out0;
   reg [2*WIDTH-1:0] partprod0 [WIDTH-1:0];
-  reg [2*WIDTH-1:0] partprod1 [WIDTH-1:0];  
+  reg [2*WIDTH-1:0] partprod1 [WIDTH-1:0];
   reg done0;
   integer i;
   wire [2*WIDTH-1:0] temp;
-   
+
   assign temp = in1;
-  
+
 
 
  always @*
    begin
-     for(i= 0; i<WIDTH/4;i=i+1) begin // perform the shifts required
+     for(i= 0; i<WIDTH/4;i=i+1) begin
        if( in2[i] == 1'b1)
          partprod0[i] = (temp<<i);
        if(in2[i+(WIDTH/4)]==1'b1)
@@ -54,7 +54,7 @@ module mulxbit(in1,in2,out,done);
    end
 
 
-always @* begin // perform the sums
+always @* begin
   out0=0;
   done0 = 0;
   for(i = 0;i<WIDTH/6;i= i+1) begin
@@ -62,13 +62,13 @@ always @* begin // perform the sums
      if(i == (WIDTH/6)-1)
     	done0 = 1;
   end
- 
+
 end
 
-  
+
 always @* begin
      out =out0;
   	 done = done0;
-end 
+end
 
 endmodule

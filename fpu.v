@@ -16,7 +16,6 @@
 // 32 (single precision) bit Floating point unit 
 // Need to find a way to generate the Done flag correctly
 // This is the top level instantiation
-
 module fpu(
 `ifdef USE_POWER_PINS
         inout vccd1,
@@ -25,9 +24,8 @@ module fpu(
 
 input [31:0] in1p,in2p,
  input clk,
- input rstp,act,power_off_add,retain_add,isolate_add,
- input enable_add,enable_mul,enable_sqr,enable_div,enable_comp,
- input [2:0] round_mp, // rounding mode selector
+ input rstp,act,
+  input [2:0] round_mp, // rounding mode selector
 output reg [31:0] out,
 output reg ov,un,less,eq,great,done,inv,inexact,div_zero,
   input [2:0] opcode // 1 = mul, 0 = add, 2 = division, 3 = square root, 4 = compare
@@ -46,7 +44,7 @@ reg rsta,rstm,rstd,rstc,rsts;
   
 
   //add
-  fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rsta),.round_m(round_mp),.done(adone),.inv(inva),.inexact(inexacta),.enable(enable_add));
+  fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rsta),.round_m(round_mp),.act(act),.done(adone),.inv(inva),.inexact(inexacta));
   //mul
   fp_mul mulu(.in1(in1pm),.in2(in2pm),.out(mout),.ov(mov),.un(mun),.clk(clk),.rst(rstm),.round_m(round_mp),.act(act),.done(mdone),.inv(invm),.inexact(inexactm));
   //compare
@@ -185,9 +183,6 @@ always @* begin
     done0 = adone;
     rsta = rstp;
     rstc = 0;
-    rstd = 0;
-    rstm = 0;
-    rsts = 0;
     in1pa = in1p;
     in2pa = in2p;
     in1pm = 0;

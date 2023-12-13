@@ -14,8 +14,9 @@
 */
 // fp square root of 2 32 bit fp numbers
 //5 rounding modes implemented
-`include "special_characters.v"
 `include "sqrt.v"
+
+
 module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -47,14 +48,15 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   wire S1,S0;
   reg   [E-M-1:0] B = 127;
   integer i;
-  
+
 
   //initialize values
   assign  E1  = in1[E:M+1]+1;
  assign S1 = in1[W-1];
 
-  
+
   always @* begin // calculate forward_c exceptions
+
        if(S1==1'b1)
       	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,0,0,1'b1,1'b1,1'b0,1'b1};
        else if((in1 == `FP_NANS))
@@ -62,10 +64,10 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
        else if((in1 == `FP_INFP))
       	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,1'b1,1'b0,1'b1,1'b0,1'b0,1'b1};
        else
-	  {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,1'b1,1'b0,1'b1,1'b0,1'b0,1'b0};
- end
-  
-  
+         forward_c = 0;
+  end
+
+
   always @(posedge clk or negedge rst) begin // calculate forward exceptions
      if(!rst)
      {out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {0,0,0,0,0,0};
@@ -73,57 +75,57 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
        {out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c};
      end
   end
-  
-  
-  
-  
+
+
+
+
 /*
- the square root requires that the Mantissa be multiplied by 2 if 
+ the square root requires that the Mantissa be multiplied by 2 if
  exponent is odd, the following always block does this
 */
-  always @* begin // 
+  always @* begin //
     M1 = {2'b01,in1[M:0]};
     if(E1[0] == 1'b1)
       M1 = M1<<1;
   end
-  
+
   // Determine sign
   assign S0 = 0;
-  
- 
+
+
   //calculate exponent
 
-   
-  sqrt sq (.in({1'b0,M1}),.out(M0r),.sticky(t),.clk(clk),.rst(rst),.done(done0)); // add one more bit than the Width to be able to perform the arithmetic inside sqrt
- 
+
+  sqrt #(.WIDTH(M+3+1)) sq (.in({1'b0,M1}),.out(M0r),.sticky(t),.clk(clk),.rst(rst),.done(done0)); // add one more bit than the Width to be able to perform the arithmetic inside sqrt
+
   always @(posedge clk or negedge rst) begin// pipeline?????
 	if(!rst)
     {M00r,done0_r} <= {0,0};
 	else
     {M00r,done0_r} <= {M0r,done0};
 
- end	 
+ end
 
-  
-   
+
+
   always @* begin // rounding schemes
     M01 = M00r;
     E0=E1>>1; //calculate exponent
     E0 = E0 +63;
     next_number = {E0,M01[M+2:2]};
     next_number = next_number +1;
-    
-  
+
+
     g = M01[1]; // round bit (actually)
-   
+
     l= M01[2]; // lsb
-    
-   
+
+
     if((round_m == `RD)||((!S0)&(round_m==`RZ))||((round_m == `RU)&&(S0))) begin// RD or RZ (RU for x < 0)
-     	M0 = M01[M+2:2]; 
+     	M0 = M01[M+2:2];
       	Eround = E0;
     end
-    
+
     else if(round_m == `RNe) begin //RN ties to even
       case ({g,t})
         2'b00: begin
@@ -147,15 +149,11 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         2'b11:begin
            M0 = next_number[M:0];
            Eround = next_number[E:M+1];
-        end 
-	default:begin
-          M0 = M01[M+2:2];
-          Eround = E0;
-	end
+        end
       endcase
     end
-    
-    else if (((round_m == `RU)&&(!S0))||(S0&(round_m==`RZ))) begin //RU(x>=0) or RZ 
+
+    else if (((round_m == `RU)&&(!S0))||(S0&(round_m==`RZ))) begin //RU(x>=0) or RZ
       if({g,t} == 2'b00) begin
          M0 = M01[M+2:2];
          Eround = E0;
@@ -165,9 +163,9 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         Eround = next_number[E:M+1];
       end
     end
-    
 
-    else begin //RN ties to away
+
+    else if(round_m == `RNa) begin //RN ties to away
       case ({g,t})
         2'b00: begin
           M0 = M01[M+2:2];
@@ -184,14 +182,10 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         2'b11:begin
            M0 = next_number[M:0];
            Eround = next_number[E:M+1];
-        end 
-	default:begin
-          M0 = M01[M+2:2];
-          Eround = E0;
-	end
+        end
       endcase
         end
-    
+
   ///////////////////////////////////////////////////////////////////// inexact flag calculation
     if((M0 == M01[M+2:2])&&(t == 0)&&(g == 0)) begin
     	inexact0 = 1'b0;
@@ -201,15 +195,15 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
     	done1 = done0_r;
     end
   end
-  
-  
+
+
 
     // determine overflow or underflow
   always @* begin
-    {ov0,un0} = {(E0>254|E0>254)?1'b1:1'b0,(E0<1|E0<1)?1'b1:1'b0}; 
+    {ov0,un0} = {(E0>254|E0>254)?1'b1:1'b0,(E0<1|E0<1)?1'b1:1'b0};
   end
-  
-  
+
+
   always @(posedge clk or negedge rst)  begin// output the values and exceptions
       if(!rst)
       {out[M:0],out[E:M+1],out[W-1],ov,un,done,inv,inexact} <= {0,0,0,0,0,0,0,0};
@@ -220,7 +214,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         {out,ov,un,done,inv,inexact} <= {out_f,ov_f,un_f,done_f,inv_f,inexact_f};
      end
   end
-  
-  
-  
+
+
+
 endmodule
