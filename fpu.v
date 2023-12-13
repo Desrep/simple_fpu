@@ -16,12 +16,8 @@
 // 32 (single precision) bit Floating point unit 
 // Need to find a way to generate the Done flag correctly
 // This is the top level instantiation
+`include "special_characters.v"
 module fpu(
-`ifdef USE_POWER_PINS
-        inout vccd1,
-        inout vssd1,
-`endif
-
 input [31:0] in1p,in2p,
  input clk,
  input rstp,act,
@@ -35,7 +31,7 @@ output reg ov,un,less,eq,great,done,inv,inexact,div_zero,
 reg [31:0] out0;
 reg [31:0] in1pa,in2pa,in1pm,in2pm,in1pc,in2pc,in1pd,in2pd,in1ps;
 wire [31:0] aout,mout,dout,sout;
-wire aov,aun,mov,mun,dov,dun,sov,sun;
+wire aov,aun,mov,mun,dov,dun,sov,sun,eq0,less0,great0;
 wire inva,invm,invd,invs,div_zerod,invc;
 wire inexacta,inexactm,inexactd,inexacts;
 reg ov0,un0,done0,inv0,inexact0,div_zero0;
@@ -48,7 +44,7 @@ reg rsta,rstm,rstd,rstc,rsts;
   //mul
   fp_mul mulu(.in1(in1pm),.in2(in2pm),.out(mout),.ov(mov),.un(mun),.clk(clk),.rst(rstm),.round_m(round_mp),.act(act),.done(mdone),.inv(invm),.inexact(inexactm));
   //compare
-  fp_comp com1(.in1(in1pc),.in2(in2pc),.eq(eq),.great(great),.less(less),.act(act),.done(cdone),.clk(clk),.rst(rstc),.inv(invc));
+  fp_comp com1(.in1(in1pc),.in2(in2pc),.eq(eq0),.great(great0),.less(less0),.act(act),.done(cdone),.clk(clk),.rst(rstc),.inv(invc));
   // division
   fp_div dv1(.in1(in1pd),.in2(in2pd),.out(dout),.ov(dov),.un(dun),.rst(rstd),.clk(clk),.round_m(round_mp),.act(act),.done(ddone),.inv(invd),.inexact(inexactd),.div_zero(div_zerod));
   //square root
@@ -183,6 +179,9 @@ always @* begin
     done0 = adone;
     rsta = rstp;
     rstc = 0;
+    rstm = 0;
+    rstd = 0;
+    rsts = 0;
     in1pa = in1p;
     in2pa = in2p;
     in1pm = 0;
@@ -204,7 +203,7 @@ end
   
 always @*
 begin  
-  {out,ov,un,done,inv,inexact,div_zero} = {out0,ov0,un0,done0,inv0,inexact0,div_zero0};
+  {out,ov,un,done,inv,inexact,div_zero,eq,great,less} = {out0,ov0,un0,done0,inv0,inexact0,div_zero0,eq0,great0,less0};
 end
 
 

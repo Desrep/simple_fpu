@@ -17,7 +17,7 @@
 //
 
 module sqrt(in,out,sticky,clk,rst,done);
-  parameter WIDTH = 8;
+  parameter WIDTH = 26;
   parameter STAGES = 6; // control the number of pipeline stages
   input [WIDTH-1:0] in;
   input rst,clk;

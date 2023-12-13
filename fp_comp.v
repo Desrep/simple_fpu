@@ -7,7 +7,7 @@
        http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
+   distributed under the License is distributed on an "AS IS" `BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
@@ -15,7 +15,7 @@
 // Simple FP comparator
 //
 
-
+`include "special_characters.v"
 module fp_comp(in1,in2,eq,great,less,act,done,clk,rst,inv);
   parameter W = 32;
   parameter M = 22;
@@ -49,6 +49,8 @@ module fp_comp(in1,in2,eq,great,less,act,done,clk,rst,inv);
        {less_f,eq_f,great_f,done_f,inv_f,forward} <= {1'b0,1'b1,1'b0,1'b1,1'b1,1'b1};
       else if( (in1 == `FP_INFP) || (in2 == `FP_INFP) || (in1 == `FP_INFN) || (in2 == `FP_INFN))
        {less_f,eq_f,great_f,done_f,inv_f,forward} <= {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1};
+       else
+	{less_f,eq_f,great_f,done_f,inv_f,forward} <= {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1};
       end
   end
 

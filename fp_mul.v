@@ -7,7 +7,7 @@
        http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
+   distributed under the License is distributed on an "AS IS" `BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
@@ -17,7 +17,7 @@
 //
 // fp multiplication of 2 32 bit fp numbers
 // 5 rounding modes implemented
-`include "mulxbit.v"
+`include "special_characters.v"
 module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -50,7 +50,6 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   wire done0;
   reg done0_reg,done1;
   wire S1,S2,S0;
-  reg   [E-M-1:0] B = 127;
   integer i;
 
   //initialize values
@@ -71,7 +70,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
     end
      else if((in1 == `FP_NANS)||(in2 == `FP_NANS))
      	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b1};
-     else if( (in1 == `FP_INFP) || (in2 == `FP_INFP) || (in1 == `FP_INFN) || (in2 == `FP_INFN)) begin // Case for cero
+     else if( (in1 == `FP_INFP) || (in2 == `FP_INFP) || (in1 == `FP_INFN) || (in2 == `FP_INFN)) begin 
           if(((in1 == `FP_INFP)&&(in2 == `FP_INFN))||((in1 == `FP_INFN)&&(in2 == `FP_INFP)))
           {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,0,0,1'b1,1'b0,1'b0,1'b1};
        else if(((in1 == `FP_INFP)&&(in2 == `FP_INFP))||((in1 == `FP_INFN)&&(in2 == `FP_INFN)))
@@ -86,8 +85,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
       	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,0,0,1'b1,1'b0,1'b0,1'b1};
      end
      else
-        forward_c = 0;
-  
+ 	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,0,0,1'b1,1'b0,1'b0,1'b0}; 
   end
   
   
@@ -128,7 +126,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
     always @*
     begin // normalize to scientific notation and standard
       M01 = M000;
-      E0 = E2+E1-B; // calculate exponent
+      E0 = E2+E1-`B; // calculate exponent
       t = |M01[M-1:0]; // sticky  
       if(M000[2*M+3] == 1'b1) begin
            M01 = M01 >> 1;
@@ -209,10 +207,17 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         2'b11:begin
            Mround = next_number[M:0];
            Eround = next_number[E:M+1];
-        end 
+
+        end
       endcase
     end
-    
+    else begin
+        Mround = M01[2*M+1:M+1];
+        Eround = E0;
+
+    end
+
+
   ///////////////////////////////////////////////////////////////////// inexact flag calculation
     if((Mround == M01[2*M+1:M+1])&&(t == 0)&&(g == 0)) begin
     	inexact0 = 1'b0;

@@ -7,7 +7,7 @@
        http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
+   distributed under the License is distributed on an "AS IS" `BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
@@ -15,8 +15,8 @@
 
 
 // fp division 2 32 bit fp numbers
-`include "divide_r.v"
 //5 rounding modes implemented
+`include "special_characters.v"
 module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -33,7 +33,8 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   wire [E-M-1:0] E1,E2;
   reg [E-M-1:0] Ef1,Ef2;
   reg [E-M-1:0] E0,E01,E02,E001,Eround;
-  reg [M+3:0] M1,M2,M01,M0r,Mf2,Mf1,w_convergent,M02,M00r;
+  reg [M+3:0] M1,M2,M01,Mf2,Mf1,w_convergent,M02,M00r;
+  wire [M+3:0] M0r;
   reg [M:0] M0;
   reg ov0,un0,inexact0,t,g,l,tmerge;
   wire tdiv;
@@ -47,7 +48,6 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   reg [1:0] gr; // guard and round bits
   reg sticky; // sticky bit
   wire S1,S2,S0;
-  reg   [E-M-1:0] B = 127;
   integer i;
 
 
@@ -94,7 +94,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
      else if((in1 == `FP_NANS)||(in2 == `FP_NANS))
     	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b0,1'b1};
     else
-       forward_c = ~rst;
+	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b0,~rst};
   end
 
 
@@ -139,15 +139,15 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   //calculate exponent
   always @* begin
     if(Ef1>Ef2) begin
-    E01 = Ef1-Ef2+B;
+    E01 = Ef1-Ef2+`B;
 
     end
     else begin
-      E01 = B-(Ef2-Ef1);
+      E01 = `B-(Ef2-Ef1);
     end
   end
 
-  divide_r #(.WIDTH(M+4)) div1 (.num(Mf1),.den(Mf2),.quot(M0r),.sticky(tdiv),.clk(clk),.rst(rst),.done(done0));
+  divide_r  div1i(.num(Mf1),.den(Mf2),.quot(M0r),.sticky(tdiv),.clk(clk),.rst(rst),.done(done0));
 
   always @(posedge clk or negedge rst) begin
   	if(!rst)
@@ -243,6 +243,10 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
            Eround = next_number[E:M+1];
         end
       endcase
+    end
+    else begin
+          M0 = M01[M+2:2];
+          Eround = E0;
     end
   ///////////////////////////////////////////////////////////////////// inexact flag calculation
     if((M0 == M01[M+2:2])&&(t == 0)&&(g == 0)) begin

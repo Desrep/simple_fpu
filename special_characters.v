@@ -23,3 +23,4 @@
 `define RU 3'b010 // Round towards plus infinity
 `define RZ 3'b011 // Round towards zero
 `define RNa 3'b100 // RN ties to away
+`define B 8'b01111111 // bias

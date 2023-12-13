@@ -7,7 +7,7 @@
        http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
+   distributed under the License is distributed on an "AS IS" `BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
@@ -18,6 +18,7 @@
 
 // FP add for 32 bit numbers
 //5 rounding modes implemented
+`include "special_characters.v"
 module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -90,7 +91,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         else if((in1 == `FP_NANS)||(in2 == `FP_NANS))
        		 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b1};
     	else
-           forward_c = 0;
+           {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b0};
 
   end
 
@@ -274,7 +275,10 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         end
       endcase
     end
-
+    else begin
+          M0 = M01[M+2:2];
+          Eround = E0;
+    end
 
   ///////////////////////////////////////////////////////////////////// inexact flag calculation
     if((M0 == M01[M+2:2])&&(t == 0)&&(g == 0)) begin
@@ -301,7 +305,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         if(!forward)
         {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {S0,Eround,M0,ov0,un0,done1,1'b0,inexact0};
         else
-        {out_f,ov,un,done,inv,inexact} <= {out_f,ov_f,un_f,done_f,inv_f,inexact_f};
+        {out,ov,un,done,inv,inexact} <= {out_f,ov_f,un_f,done_f,inv_f,inexact_f};
       end
 
   end

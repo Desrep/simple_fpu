@@ -7,16 +7,14 @@
        http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
+   distributed under the License is distributed on an "AS IS" `BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
 */
 // fp square root of 2 32 bit fp numbers
 //5 rounding modes implemented
-`include "sqrt.v"
-
-
+`include "special_characters.v"
 module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -33,7 +31,8 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   reg [E-M-1:0] Ef1;
   reg [E-M-1:0] E0,E01,E02,E001,Eround;
   reg [M+2:0] M1,Mf1;
-  reg [M+3:0] M0r,M00r,M01;
+  reg [M+3:0] M00r,M01;
+  wire [M+3:0] M0r;
   reg [M:0] M0;
   reg ov0,un0,inexact0;
   reg done0_r,done1;
@@ -46,25 +45,30 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   reg [W-1:0] out_f,out_f_c;
   reg forward,forward_c;
   wire S1,S0;
-  reg   [E-M-1:0] B = 127;
   integer i;
 
 
+  
   //initialize values
   assign  E1  = in1[E:M+1]+1;
  assign S1 = in1[W-1];
 
 
-  always @* begin // calculate forward_c exceptions
 
-       if(S1==1'b1)
-      	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,0,0,1'b1,1'b1,1'b0,1'b1};
-       else if((in1 == `FP_NANS))
-      	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,0,0,1'b1,1'b1,1'b0,1'b1};
-       else if((in1 == `FP_INFP))
-      	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,1'b1,1'b0,1'b1,1'b0,1'b0,1'b1};
-       else
-         forward_c = 0;
+
+
+
+  always @* begin // calculate forward_c exceptions
+       if(in1 == `FP_INFP)
+     	   {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,1'b1,1'b0,1'b1,1'b0,1'b0,1'b1};   
+     else begin
+	   //if((in1 == `FP_NANS))
+	///	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,0,0,1'b1,1'b1,1'b0,1'b1};
+	    if ( in1[W-1]==1'b1 )
+		{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,0,0,1'b1,1'b1,1'b0,1'b1};
+	   else
+                {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b1,1'b0,1'b1,1'b0,1'b0,1'b0};
+        end
   end
 
 
@@ -96,7 +100,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   //calculate exponent
 
 
-  sqrt #(.WIDTH(M+3+1)) sq (.in({1'b0,M1}),.out(M0r),.sticky(t),.clk(clk),.rst(rst),.done(done0)); // add one more bit than the Width to be able to perform the arithmetic inside sqrt
+  sqrt  sq(.in({1'b0,M1}),.out(M0r),.sticky(t),.clk(clk),.rst(rst),.done(done0)); // add one more bit than the Width to be able to perform the arithmetic inside sqrt
 
   always @(posedge clk or negedge rst) begin// pipeline?????
 	if(!rst)
@@ -182,10 +186,14 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
         2'b11:begin
            M0 = next_number[M:0];
            Eround = next_number[E:M+1];
-        end
+	end
       endcase
         end
+     else begin
+    	  M0 = M01[M+2:2];
+          Eround = E0;
 
+     end
   ///////////////////////////////////////////////////////////////////// inexact flag calculation
     if((M0 == M01[M+2:2])&&(t == 0)&&(g == 0)) begin
     	inexact0 = 1'b0;
