@@ -1,3 +1,9 @@
+`include "fpu.v"
+`include "fp_add.v"
+`include "fp_mul.v"
+`include "fp_div.v"
+`include "fp_comp.v"
+`include "fp_sqr.v"
 
 module top_tb();
   parameter WIDTH = 32;

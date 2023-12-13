@@ -1,4 +1,4 @@
-/* Copyright 2023 Fereie
+/* Copyright 2023 Desrep
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 // fp multiplication of 2 32 bit fp numbers
 // 5 rounding modes implemented
 `include "special_characters.v"
+`include "mulxbit.v"
 module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -56,7 +57,8 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
  assign S1 = in1[W-1];
   assign S2 = in2[W-1];
 
-  
+
+// the following are exceptions  
  always @* begin
      if(((in1 == `FP_INFP)&&(in2 == `FP_ZEROP))||((in1 == `FP_INFN)&&(in2 == `FP_ZEROP))
         	||((in1 == `FP_INFP)&&(in2 == `FP_ZERON))||((in1 == `FP_INFN)&&(in2 == `FP_ZERON)))

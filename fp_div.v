@@ -1,4 +1,4 @@
-/* Copyright 2023 Fereie
+/* Copyright 2023 Desrep
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
    limitations under the License.
 */
 // fp division 2 32 bit fp numbers
-//only truncates// no pipeline for now
-// fp division 2 32 bit fp numbers
 //5 rounding modes implemented
 `include "special_characters.v"
+`include "divide_r.v"
+
 module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -58,7 +58,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
  assign S1 = in1[W-1];
   assign S2 = in2[W-1];
   
-  
+// The following are exceptions  
   always @* begin   
       
       if( ((in1==`FP_ZEROP)&&(in2==`FP_ZEROP))||((in1==`FP_ZERON)&&(in2==`FP_ZERON))

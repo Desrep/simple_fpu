@@ -1,4 +1,4 @@
-/* Copyright 2023 Fereie
+/* Copyright 2023 Desrep
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-// unsigned restoring fraction divider 
+// unsigned restoring fraction divider, fixed point division
 // num <= den
 // since it's restoring the remainder is positive
 module divide_r(num,den,quot,remo,sticky,clk,rst,done);

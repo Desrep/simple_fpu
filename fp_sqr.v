@@ -1,4 +1,4 @@
-/* Copyright 2023 Fereie
+/* Copyright 2023 Desrep
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-// fp multiplication of 2 32 bit fp numbers
-//pipelined fp multiplier, supports 2 of the 2 rounding modes truncate and round to nearest (even on tie)
-// fp multiplication of 2 32 bit fp numbers
+// fp square root of 2 32 bit fp numbers
 //5 rounding modes implemented
 `include "special_characters.v"
+`include "sqrt.v"
 module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   parameter W = 32;
   parameter M = 22;
