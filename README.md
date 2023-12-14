@@ -2,6 +2,38 @@
 Fpu RTL for the IEEE 754 single precision standard, it includes addition, multiplication, division, square root and fp compare. It has some exception management. It's a very simple implementation using recursive subtraction algorithms for the division and square root units, the multiplication unit uses a parallel shift and addition of 6 terms, the rest of terms are added sequentially. The number of pipeline stages for the division and square root can be controlled with the STAGES parameter. The project is intended to be friendly for integration in the caravel project.
 ## FPU.v
 This file is actually only used for instantiation of the units mostly for testing purposes but it still works as the top module, this code can be easily modified or replaced as you wish.
+The signals do the following 
+in1p is the firt operand--------input
+in2p is the second operand--------input
+rstp is the reset signal----------input
+clk is the clock----------------input
+round_mp is the rounding mode selector, the codes can be found in special_characters.v--------input
+out is the output--------output
+ov is the overflow flag output--------output
+un is the underflow flag output--------output
+great indicates if in1p is greater than in2p (if in1p > in2p then great = 1) (compare operation)--------output
+less indicates if in2p is less than in2p (if in2p < in2p then less = 1)  (compare operation)--------output
+eq indicates in1p and in2p are equal  (compare operation)--------output
+inexact is the flag indicating if the operation completed is inexact--------output
+inv is the falg indicating if the operation  completed is invalid--------output
+div_zero, when division is selected this flag indicates if in2p is zero (meaning that in1p/in2p is a division by zero)--------output
+done is a flag indicating if the current operation is finished, this is a synchronous signal --------output
+opcode is the operation selection------input
+         00 = addition and compare
+         01 = multiplication
+         10 = division
+         11 = square root
+         
+For square root the operand used is only in1p
+Division performs in1p/in2p
+For sum if a subtraction is needed first one of the operands has to be made negative
+
+act is no longer used, I need to remove it.
+
+These signals are pretty much repeated in the different modules
+
+This design can be synthesized using vendor tools and the tests indicate that the functionality is correct, but it has not been properly tested using a standard procedure (with UVM for example, or random testing).
+In it's current state it should be possible to use icarus verilog for testing as well.
 ## fp_add.v
 This file contains the addition (and subtraction) RTL, it doesn't require any other file, to compute subtraction you would need to modify the operands first, for example to perform 3-5 you would need to convert it to 3+(-5).
 ## fp_mul.v
@@ -23,8 +55,12 @@ A regular part-by-part comparison of floating point numbers.
 ## rounding modes
 The rounding modes are defined in the special_characters file. Selected by round_mp in the top module (fpu.v).
 Adapting (or creating from scratch) the top module shouldn't be a prolem, this top module is basically a place holder if you want to test the design right away.
+## To do 
+Validation using constrained random verification.
+Formal validation using VCF for example.
 
 ## Simulation
 This link can be used to simulate the code
+(this is not up-to-date but the functionality is the same, tbd)
 https://www.edaplayground.com/x/DE5Z
     
