@@ -4,7 +4,7 @@ Fpu RTL for the IEEE 754 single precision standard, it includes addition, multip
 This file is actually only used for instantiation of the units mostly for testing purposes but it still works as the top module, this code can be easily modified or replaced as you wish.
 The signals do the following 
 
-in1p is the firt operand--------input
+in1p is the first operand--------input
 
 in2p is the second operand--------input
 
@@ -81,6 +81,7 @@ Adapting (or creating from scratch) the top module shouldn't be a prolem, this t
 ## To do 
 Validation using constrained random verification.
 Formal validation using VCF for example.
+Incorporate into a risc V implementation.
 
 ## Simulation
 This link can be used to simulate the code
