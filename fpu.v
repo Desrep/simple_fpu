@@ -36,7 +36,7 @@ wire inva,invm,invd,invs,div_zerod,invc;
 wire inexacta,inexactm,inexactd,inexacts;
 reg ov0,un0,done0,inv0,inexact0,div_zero0;
 wire adone,mdone,cdone,ddone,sdone;
-reg rsta,rstm,rstd,rstc,rsts;
+reg rsta,rstm,rstd,rstc,rsts,eq1,less1,great1;
   
 
   //add
@@ -73,6 +73,9 @@ always @* begin
       in1pd = 0;
       in2pd = 0;
       in1ps = 0;
+      eq1 = eq0;
+      great1  = great0;
+      less1 = less0;
       inv0 = inva;
       inexact0 = inexacta;
       div_zero0 = 0;
@@ -97,6 +100,9 @@ always @* begin
       in1pd = 0;
       in2pd = 0;
       in1ps = 0;
+      eq1 = 0;
+      great1  = 0;
+      less1 = 0;
       inv0 = invm;
       inexact0 = inexactm;
       div_zero0 = 0;
@@ -117,6 +123,9 @@ always @* begin
       in2pm = 0;
       in1pc = 0;
       in2pc = 0;
+      eq1 = 0;
+      great1  = 0;
+      less1 = 0;
       in1pd = in1p;
       in2pd = in2p;
       in1ps = 0;
@@ -142,6 +151,9 @@ always @* begin
       in2pc = 0;
       in1pd = 0;
       in2pd = 0;
+      eq1 = 0;
+      great1  = 0;
+      less1 = 0;
       in1ps = in1p;
       inv0 = invs;
       inexact0 = inexacts;
@@ -167,6 +179,9 @@ always @* begin
       in1pd = 0;
       in2pd = 0;
       in1ps = 0;
+      eq1 = 0;
+      great1  = 0;
+      less1 = 0;
       inv0 = invc;
       inexact0 = inexacta;
       div_zero0 = 0;
@@ -191,8 +206,11 @@ always @* begin
     in1pd = 0;
     in2pd = 0;
     in1ps = 0;
-    inv0 = inva;
-    inexact0 = inexacta;
+    eq1 = eq0;
+    great1  = 0;
+    less1 = 0;
+    inv0 = 0;
+    inexact0 = 0;
     div_zero0 = 0;
    end
   endcase
@@ -203,7 +221,7 @@ end
   
 always @*
 begin  
-  {out,ov,un,done,inv,inexact,div_zero,eq,great,less} = {out0,ov0,un0,done0,inv0,inexact0,div_zero0,eq0,great0,less0};
+  {out,ov,un,done,inv,inexact,div_zero,eq,great,less} = {out0,ov0,un0,done0,inv0,inexact0,div_zero0,eq1,great1,less1};
 end
 
 
