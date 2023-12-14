@@ -72,20 +72,20 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
                ||((in1 == `FP_ZEROP)&&( in2 == `FP_ZERON))) begin
 
          	 if( (!S1)&&(!S2))
-           		  {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_ZEROP,1'b0,1'b0,1'b0,1'b0,1'b1};
+           		  {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_ZEROP,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
 
       	    else if( ((!S1)&&(S2))||((S1)&&(!S2))) begin
               if((round_m==`RNe)||(round_m==`RNa)||(round_m==`RZ)||(round_m==`RU))
-                	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_ZEROP,1'b0,1'b0,1'b0,1'b0,1'b1};
+                	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_ZEROP,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
            		  else
-                  	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_ZERON,1'b0,1'b0,1'b0,1'b0,1'b1};
+                  	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_ZERON,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
           	 end
 
      		  else if( (S1)&&(S2)) begin
-                {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_ZERON,1'b0,1'b0,1'b0,1'b0,1'b1};
+                {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_ZERON,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
           		 end
       		 else
-            	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_ZEROP,1'b0,1'b0,1'b0,1'b0,1'b1};
+            	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_ZEROP,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
 
      	 end
         else if((in1 == `FP_NANS)||(in2 == `FP_NANS))
@@ -205,8 +205,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   always @* begin // rounding schemes
     next_number = {E0,M01[M+2:2]};
     next_number = next_number +1;
-
-
+    done1 = 1'b0;
     g = M01[1]; // round (actually)
     tmerge = t|M01[0];
     l= M01[2]; // lsb
@@ -279,7 +278,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
           M0 = M01[M+2:2];
           Eround = E0;
     end
-
+    
   ///////////////////////////////////////////////////////////////////// inexact flag calculation
     if((M0 == M01[M+2:2])&&(t == 0)&&(g == 0)) begin
     	inexact0 = 1'b0;
