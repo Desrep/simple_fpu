@@ -80,11 +80,14 @@ The rounding modes are defined in the special_characters file. Selected by round
 Adapting (or creating from scratch) the top module shouldn't be a prolem, this top module is basically a place holder if you want to test the design right away.
 ## To do 
 Validation using constrained random verification.
+
 Formal validation using VCF for example.
+
 Incorporate into a risc V implementation.
 
 ## Simulation
 This link can be used to simulate the code
+
 (this is not up-to-date but the functionality is the same, tbd)
 https://www.edaplayground.com/x/DE5Z
     
