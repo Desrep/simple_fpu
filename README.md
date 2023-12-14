@@ -3,29 +3,51 @@ Fpu RTL for the IEEE 754 single precision standard, it includes addition, multip
 ## FPU.v
 This file is actually only used for instantiation of the units mostly for testing purposes but it still works as the top module, this code can be easily modified or replaced as you wish.
 The signals do the following 
+
 in1p is the firt operand--------input
+
 in2p is the second operand--------input
+
 rstp is the reset signal----------input
+
 clk is the clock----------------input
+
 round_mp is the rounding mode selector, the codes can be found in special_characters.v--------input
+
 out is the output--------output
+
 ov is the overflow flag output--------output
+
 un is the underflow flag output--------output
+
 great indicates if in1p is greater than in2p (if in1p > in2p then great = 1) (compare operation)--------output
+
 less indicates if in2p is less than in2p (if in2p < in2p then less = 1)  (compare operation)--------output
+
 eq indicates in1p and in2p are equal  (compare operation)--------output
+
 inexact is the flag indicating if the operation completed is inexact--------output
+
 inv is the falg indicating if the operation  completed is invalid--------output
+
 div_zero, when division is selected this flag indicates if in2p is zero (meaning that in1p/in2p is a division by zero)--------output
+
 done is a flag indicating if the current operation is finished, this is a synchronous signal --------output
+
 opcode is the operation selection------input
          00 = addition and compare
+         
          01 = multiplication
+         
          10 = division
+         
          11 = square root
          
+         
 For square root the operand used is only in1p
+
 Division performs in1p/in2p
+
 For sum if a subtraction is needed first one of the operands has to be made negative
 
 act is no longer used, I need to remove it.
