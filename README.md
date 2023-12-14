@@ -35,6 +35,7 @@ div_zero, when division is selected this flag indicates if in2p is zero (meaning
 done is a flag indicating if the current operation is finished, this is a synchronous signal --------output
 
 opcode is the operation selection------input
+
          00 = addition and compare
          
          01 = multiplication
