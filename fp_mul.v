@@ -64,28 +64,28 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
      
      if(((in1 == `FP_INFP)&&(in2 == `FP_ZEROP))||((in1 == `FP_INFN)&&(in2 == `FP_ZEROP))
         	||((in1 == `FP_INFP)&&(in2 == `FP_ZERON))||((in1 == `FP_INFN)&&(in2 == `FP_ZERON)))
-     			{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,0,0,1'b1,1'b1,1'b0,1'b1};
+     			{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b1};
      else if( (in1 == `FP_ZEROP) || (in2 == `FP_ZEROP) || (in1 == `FP_ZERON) || (in2 == `FP_ZERON)) begin // Case for cero
-       {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {0,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
+       {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {32'b0,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
     end
      else if((in1 == `FP_NANS)||(in2 == `FP_NANS))
      	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b1};
      else if( (in1 == `FP_INFP) || (in2 == `FP_INFP) || (in1 == `FP_INFN) || (in2 == `FP_INFN)) begin 
           if(((in1 == `FP_INFP)&&(in2 == `FP_INFN))||((in1 == `FP_INFN)&&(in2 == `FP_INFP)))
-          {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,0,0,1'b1,1'b0,1'b0,1'b1};
+          {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
        else if(((in1 == `FP_INFP)&&(in2 == `FP_INFP))||((in1 == `FP_INFN)&&(in2 == `FP_INFN)))
-       	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,0,0,1'b1,1'b0,1'b0,1'b1};
+       	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
        else if((S1 == 1'b1)&&(in2 == `FP_INFP))     
-      	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,0,0,1'b1,1'b0,1'b0,1'b1};
+      	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
        else if((S1 == 1'b0)&&(in2 == `FP_INFP))
-      	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,0,0,1'b1,1'b0,1'b0,1'b1};
+      	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
        else if((S1 == 1'b1)&&(in2 == `FP_INFN))
-     	  {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,0,0,1'b1,1'b0,1'b0,1'b1};
+     	  {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFP,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
        else  
-      	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,0,0,1'b1,1'b0,1'b0,1'b1};
+      	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1};
      end
      else
- 	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,0,0,1'b1,1'b0,1'b0,1'b0}; 
+ 	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_INFN,1'b0,1'b0,1'b1,1'b0,1'b0,1'b0}; 
   end
   
   
@@ -93,7 +93,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
   always @(posedge clk or negedge rst) begin // Forward results (exceptions)
     if(!rst) begin
-      {out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {0,1'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
+      {out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {32'b0,1'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
     end
    else begin
      {out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c};
@@ -118,7 +118,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
   always @(posedge clk or negedge rst) begin
      if(!rst) 
-     {M000,done0_reg} <= {0,0};
+     {M000,done0_reg} <= {48'b0,1'b0};
      else
      {M000,done0_reg} <= {M00,done0};
   end
@@ -237,7 +237,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
   always @(posedge clk or negedge rst)  begin// output the values and exceptions
    if(!rst) begin
-     	 {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {0,0,0,1'b0,1'b0,1'b0,1'b0,1'b0};
+     	 {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {1'b0,8'b0,23'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
    end
    else begin
      if(!forward)

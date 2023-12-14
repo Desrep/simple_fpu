@@ -98,7 +98,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
   always @(posedge clk or negedge rst) begin // exception forwarding
       if (!rst)
-   		{out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {0,0,0,1'b0,1'b0,1'b0,1'b0};
+   		{out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {32'b0,1'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
       else begin
         {out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c};
       end
@@ -180,7 +180,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
  always @(posedge clk or negedge rst) begin
  	if(!rst)
-    {M000,done0_r} <= {0,0};
+    {M000,done0_r} <= {27'b0,1'b0};
    	else
     {M000,done0_r} <= {M00,done0};
  end
@@ -300,7 +300,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
   always @(posedge clk or negedge rst) begin // output values
       if (!rst)
-     	 {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {0,0,0,1'b0,1'b0,1'b1,1'b0,1'b0};
+     	 {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {1'b0,8'b0,23'b0,1'b0,1'b0,1'b1,1'b0,1'b0};
       else begin
         if(!forward)
         {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {S0,Eround,M0,ov0,un0,done1,1'b0,inexact0};

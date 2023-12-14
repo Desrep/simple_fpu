@@ -65,7 +65,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 	   //if((in1 == `FP_NANS))
 	///	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,0,0,1'b1,1'b1,1'b0,1'b1};
 	    if ( in1[W-1]==1'b1 )
-		{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,0,0,1'b1,1'b1,1'b0,1'b1};
+		{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b1};
 	   else
                 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b1,1'b0,1'b1,1'b0,1'b0,1'b0};
         end
@@ -74,7 +74,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
   always @(posedge clk or negedge rst) begin // calculate forward exceptions
      if(!rst)
-     {out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {0,0,0,0,0,0};
+     {out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {32'b0,1'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
      else begin
        {out_f,ov_f,un_f,done_f,inv_f,inexact_f,forward} <= {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,inexact_f_c,forward_c};
      end
@@ -104,7 +104,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
   always @(posedge clk or negedge rst) begin// pipeline?????
 	if(!rst)
-    {M00r,done0_r} <= {0,0};
+    {M00r,done0_r} <= {26'b0,1'b0};
 	else
     {M00r,done0_r} <= {M0r,done0};
 
@@ -214,7 +214,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
   always @(posedge clk or negedge rst)  begin// output the values and exceptions
       if(!rst)
-      {out[M:0],out[E:M+1],out[W-1],ov,un,done,inv,inexact} <= {0,0,0,0,0,0,0,0};
+      {out[M:0],out[E:M+1],out[W-1],ov,un,done,inv,inexact} <= {1'b0,8'b0,23'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
      else begin
        if(!forward)
        {out[M:0],out[E:M+1],out[W-1],ov,un,done,inv,inexact} <= {M0,E0,S0,ov0,un0,done1,1'b0,inexact0};

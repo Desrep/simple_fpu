@@ -88,7 +88,7 @@ if(j != STAGES) begin
 
   always @(posedge clk or negedge rst) begin
     if(!rst)
-    {quot_reg[j],rem_reg[j],done_reg[j]} <= {0,0,0};
+    {quot_reg[j],rem_reg[j],done_reg[j]} <= {27'b0,27'b0,1'b0};
     else
     {quot_reg[j],rem_reg[j],done_reg[j]} <= {quoti[j],rem[j],donei[j]};
   end

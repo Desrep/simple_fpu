@@ -88,7 +88,7 @@ module sqrt(in,out,sticky,clk,rst,done);
  if(j != STAGES) begin
   	always @(posedge clk or negedge rst) begin
       if(!rst)
-   		 {quot_reg[j],rem_reg[j],twop_reg[j],done_reg[j]} <= {0,0,0,0};
+   		 {quot_reg[j],rem_reg[j],twop_reg[j],done_reg[j]} <= {26'b0,52'b0,26'b0,1'b0};
     	else
       	{quot_reg[j],rem_reg[j],twop_reg[j],done_reg[j]}  <= {quot[j],rem[j],twop[j],donei[j]};
       end

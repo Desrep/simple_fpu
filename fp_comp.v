@@ -41,10 +41,10 @@ module fp_comp(in1,in2,eq,great,less,act,done,clk,rst,inv);
 
   always @(posedge clk or negedge rst) begin //exceptions
      if(!rst)
-     	{less_f,eq_f,great_f,done_f,inv_f,forward} <= {0,0,0,0,0,0};
+     	{less_f,eq_f,great_f,done_f,inv_f,forward} <= {1'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
     else begin
       if((in1 == `FP_NANS)||(in2 == `FP_NANS))
-        {less_f,eq_f,great_f,done_f,inv_f,forward} <= {0,0,0,1'b1,1'b1,1'b1};
+        {less_f,eq_f,great_f,done_f,inv_f,forward} <= {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1};
       else  if( ((in1==`FP_ZEROP)&&(in2==`FP_ZERON))||((in1==`FP_ZERON)&&(in2==`FP_ZEROP)))
        {less_f,eq_f,great_f,done_f,inv_f,forward} <= {1'b0,1'b1,1'b0,1'b1,1'b1,1'b1};
       else if( (in1 == `FP_INFP) || (in2 == `FP_INFP) || (in1 == `FP_INFN) || (in2 == `FP_INFN))
@@ -115,7 +115,7 @@ module fp_comp(in1,in2,eq,great,less,act,done,clk,rst,inv);
 
   always @(posedge clk or negedge rst) begin
     if(!rst)
-    	{less,eq,great,done,inv} <= {0,0,0,0,0};
+    	{less,eq,great,done,inv} <= {1'b0,1'b0,1'b0,1'b0,1'b0};
     else begin
       if(!forward)
       		{less,eq,great,done,inv} <= {less0,eq0,great0,done0,1'b0};

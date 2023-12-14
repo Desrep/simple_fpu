@@ -34,7 +34,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   reg [E-M-1:0] Ef1,Ef2;
   reg [E-M-1:0] E0,E01,E02,E001,Eround;
   reg [M+3:0] M1,M2,M01,Mf2,Mf1,w_convergent,M02,M00r;
-  wire [M+3:0] M0r;
+  wire [M+3:0] M0r,rem;
   reg [M:0] M0;
   reg ov0,un0,inexact0,t,g,l,tmerge;
   wire tdiv;
@@ -70,7 +70,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
              ||((in1==`FP_ZERON)&&(in2==`FP_INFP))||((in1==`FP_ZERON)&&(in2==`FP_INFN)))
     			 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b0,1'b1};
      else if ((in1==`FP_ZEROP)||(in1==`FP_ZERON))
-   		  {out_f_c[M:0],out_f_c[E:M+1],out_f_c[W-1],ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {0,0,0,0,0,1'b1,1'b0,1'b1,1'b0,1'b1};
+   		  {out_f_c[M:0],out_f_c[E:M+1],out_f_c[W-1],ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {23'b0,8'b0,1'b0,1'b0,1'b0,1'b1,1'b0,1'b1,1'b0,1'b1};
      else if ((in2==`FP_INFP)||(in2==`FP_INFN)) begin
        if((S1 == 1'b1)&&(in2==`FP_INFP))
       	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {`FP_ZERON,1'b0,1'b0,1'b1,1'b0,1'b1,1'b0,1'b1};
@@ -100,7 +100,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
 
   always @(posedge clk or negedge rst) begin // calculate forward exceptions
   if(!rst) begin
-  	  {out_f,ov_f,un_f,done_f,inv_f,div_zero_f,inexact_f,forward} <= {0,0,0,0,0,0,1'b0,1'b0};
+  	  {out_f,ov_f,un_f,done_f,inv_f,div_zero_f,inexact_f,forward} <= {32'b0,1'b0,1'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
     end
    else begin
      {out_f,ov_f,un_f,done_f,inv_f,div_zero_f,inexact_f,forward} <= {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c};
@@ -147,11 +147,11 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
     end
   end
 
-  divide_r  div1i(.num(Mf1),.den(Mf2),.quot(M0r),.sticky(tdiv),.clk(clk),.rst(rst),.done(done0));
+  divide_r  div1i(.num(Mf1),.den(Mf2),.quot(M0r),.sticky(tdiv),.clk(clk),.rst(rst),.done(done0),.remo(rem));
 
   always @(posedge clk or negedge rst) begin
   	if(!rst)
-    {M00r,done0_reg} <= {0,0};
+    {M00r,done0_reg} <= {26'b0,1'b0};
    	else
     {M00r,done0_reg} <= {M0r,done0};
   end
@@ -268,7 +268,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
 
   always @(posedge clk or negedge rst)  begin// output the values and exceptions
     if(!rst) begin
-      {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,div_zero,inexact} <= {0,0,0,1'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
+      {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,div_zero,inexact} <= {1'b0,8'b0,23'b0,1'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
     end
 
     else begin
