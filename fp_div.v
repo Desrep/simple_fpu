@@ -17,6 +17,7 @@
 // fp division 2 32 bit fp numbers
 //5 rounding modes implemented
 `include "special_characters.v"
+`include "divide_r.v"
 module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   parameter W = 32;
   parameter M = 22;
@@ -94,7 +95,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
      else if((in1 == `FP_NANS)||(in2 == `FP_NANS))
     	 {out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b0,1'b1};
     else
-	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b0,~rst};
+	{out_f_c,ov_f_c,un_f_c,done_f_c,inv_f_c,div_zero_f_c,inexact_f_c,forward_c} = {`FP_NANQ,1'b0,1'b0,1'b1,1'b1,1'b0,1'b0,1'b0};
   end
 
 

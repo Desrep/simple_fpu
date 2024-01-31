@@ -17,6 +17,12 @@
 // Need to find a way to generate the Done flag correctly
 // This is the top level instantiation
 `include "special_characters.v"
+`include "fp_mul.v"
+`include "fp_div.v"
+`include "fp_comp.v"
+`include "fp_add.v"
+`include "fp_sqr.v"
+
 module fpu(
 input [31:0] in1p,in2p,
  input clk,
@@ -40,15 +46,15 @@ reg rsta,rstm,rstd,rstc,rsts,eq1,less1,great1;
   
 
   //add
-  fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rsta),.round_m(round_mp),.act(act),.done(adone),.inv(inva),.inexact(inexacta));
+  fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.done(adone),.inv(inva),.inexact(inexacta));
   //mul
-  fp_mul mulu(.in1(in1pm),.in2(in2pm),.out(mout),.ov(mov),.un(mun),.clk(clk),.rst(rstm),.round_m(round_mp),.act(act),.done(mdone),.inv(invm),.inexact(inexactm));
+  fp_mul mulu(.in1(in1pm),.in2(in2pm),.out(mout),.ov(mov),.un(mun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.done(mdone),.inv(invm),.inexact(inexactm));
   //compare
-  fp_comp com1(.in1(in1pc),.in2(in2pc),.eq(eq0),.great(great0),.less(less0),.act(act),.done(cdone),.clk(clk),.rst(rstc),.inv(invc));
+  fp_comp com1(.in1(in1pc),.in2(in2pc),.eq(eq0),.great(great0),.less(less0),.act(act),.done(cdone),.clk(clk),.rst(rstp),.inv(invc));
   // division
-  fp_div dv1(.in1(in1pd),.in2(in2pd),.out(dout),.ov(dov),.un(dun),.rst(rstd),.clk(clk),.round_m(round_mp),.act(act),.done(ddone),.inv(invd),.inexact(inexactd),.div_zero(div_zerod));
+  fp_div dv1(.in1(in1pd),.in2(in2pd),.out(dout),.ov(dov),.un(dun),.rst(rstp),.clk(clk),.round_m(round_mp),.act(act),.done(ddone),.inv(invd),.inexact(inexactd),.div_zero(div_zerod));
   //square root
-  fp_sqr   sqr1(.in1(in1ps),.out(sout),.ov(sov),.un(sun),.clk(clk),.rst(rsts),.round_m(round_mp),.act(act),.done(sdone),.inv(invs),.inexact(inexacts));
+  fp_sqr   sqr1(.in1(in1ps),.out(sout),.ov(sov),.un(sun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.done(sdone),.inv(invs),.inexact(inexacts));
 
   // Select inputs and outputs depending on the operation
 always @* begin
@@ -59,11 +65,6 @@ always @* begin
       ov0= aov;
       un0= aun;
       done0 = adone;
-      rsta = rstp;
-      rstc = 0;
-      rstm = 0;
-      rstd = 0;
-      rsts = 0;
       in1pa = in1p;
       in2pa = in2p;
       in1pm = 0;
@@ -86,11 +87,6 @@ always @* begin
       ov0 = mov;
       un0 = mun;
       done0 = mdone;
-      rstm = rstp;
-      rstc = 0;
-      rsta = 0;
-      rstd = 0;
-      rsts = 0;
       in1pa = 0;
       in2pa = 0;
       in1pm = in1p;
@@ -112,11 +108,6 @@ always @* begin
       ov0 = dov;
       un0 = dun;
       done0 = ddone;
-      rstd = rstp;
-      rstc = 0;
-      rsta = 0;
-      rstm = 0;
-      rsts = 0;
       in1pa = 0;
       in2pa = 0;
       in1pm = 0;
@@ -138,11 +129,6 @@ always @* begin
       ov0 = sov;
       un0 = sun;
       done0 = sdone;
-      rsts = rstp;
-      rstc = 0;
-      rsta = 0;
-      rstm = 0;
-      rstd = 0;
       in1pa = 0;
       in2pa = 0;
       in1pm = 0;
@@ -164,12 +150,6 @@ always @* begin
       out0 = 0;
       ov0 = sov;
       un0 = sun;
-      done0 = cdone;
-      rstc = rstp;
-      rsta = 0;
-      rstm = 0;
-      rstd = 0;
-      rsts = 0;
       in1pa = 0;
       in2pa = 0;
       in1pm = 0;
@@ -192,11 +172,6 @@ always @* begin
       ov0= aov;
       un0= aun;
     done0 = adone;
-    rsta = rstp;
-    rstc = 0;
-    rstm = 0;
-    rstd = 0;
-    rsts = 0;
     in1pa = in1p;
     in2pa = in2p;
     in1pm = 0;
