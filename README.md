@@ -84,6 +84,9 @@ Validation using constrained random verification.
 Formal validation using VCF for example.
 
 Incorporate into a risc V implementation.
+         Add interface (bus) structures
+         Add FPU register structures
+         others
 
 ## Simulation
 This link can be used to simulate the code
