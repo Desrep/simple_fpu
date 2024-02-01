@@ -22,28 +22,36 @@
 `include "fp_comp.v"
 `include "fp_add.v"
 `include "fp_sqr.v"
+`include  "sram_1rw1r_32_256_8_sky130.v"
 
 module fpu(
-input [31:0] in1p,in2p,
- input clk,
- input rstp,act,
-  input [2:0] round_mp, // rounding mode selector
+input [31:0] inp, // external input to memory
+input clk,
+input [4:0] addr1,addr2,addr3, // addr1 for op1, addr2 for op2, addr3 to store the output
+input rstp,act,
+input [2:0] round_mp, // rounding mode selector
 output reg [31:0] out,
 output reg ov,un,less,eq,great,done,inv,inexact,div_zero,
-  input [2:0] opcode // 1 = mul, 0 = add, 2 = division, 3 = square root, 4 = compare
+input [2:0] opcode, // 1 = mul, 0 = add, 2 = division, 3 = square root, 4 = compare
+input enable,ld // this set to 0 enables the fpu operations, 1 enables write to memory from the inputs
+//ld loads from memory to the fp registers
   );
 
  
 reg [31:0] out0;
-reg [31:0] in1pa,in2pa,in1pm,in2pm,in1pc,in2pc,in1pd,in2pd,in1ps;
-wire [31:0] aout,mout,dout,sout;
+reg [31:0] in1pa,in2pa,in1pm,in2pm,in1pc,in2pc,in1pd,in2pd,in1ps,in1p,in2p;
+wire [31:0] aout,mout,dout,sout,din0,dout0,dout1;
+wire [4:0] addr0;
+reg [4:0] addrx;
 wire aov,aun,mov,mun,dov,dun,sov,sun,eq0,less0,great0;
 wire inva,invm,invd,invs,div_zerod,invc;
 wire inexacta,inexactm,inexactd,inexacts;
 reg ov0,un0,done0,inv0,inexact0,div_zero0;
 wire adone,mdone,cdone,ddone,sdone;
 reg rsta,rstm,rstd,rstc,rsts,eq1,less1,great1;
-  
+reg csb0,csb1,web0;
+wire [3:0] wmask0;
+reg [3:0] done_count;
 
   //add
   fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.done(adone),.inv(inva),.inexact(inexacta));
@@ -56,6 +64,10 @@ reg rsta,rstm,rstd,rstc,rsts,eq1,less1,great1;
   //square root
   fp_sqr   sqr1(.in1(in1ps),.out(sout),.ov(sov),.un(sun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.done(sdone),.inv(invs),.inexact(inexacts));
 
+ // Sram
+ sram_1rw1r_32_256_8_sky130 sram1(.clk0(clk),.clk1(clk),.csb0(csb0),.web0(web0),.wmask0(wmask0),.addr0(addr0),.addr1(addr2),.din0(din0),.dout0(dout0),.dout1(dout1),.csb1(csb1)
+);
+
   // Select inputs and outputs depending on the operation
 always @* begin
     
@@ -64,7 +76,6 @@ always @* begin
       out0 = aout;
       ov0= aov;
       un0= aun;
-      done0 = adone;
       in1pa = in1p;
       in2pa = in2p;
       in1pm = 0;
@@ -80,13 +91,15 @@ always @* begin
       inv0 = inva;
       inexact0 = inexacta;
       div_zero0 = 0;
-
+      if(done_count == 2)
+     	done0 = 1;
+      else
+        done0 = 0;
     end
     1: begin
       out0 = mout;
       ov0 = mov;
       un0 = mun;
-      done0 = mdone;
       in1pa = 0;
       in2pa = 0;
       in1pm = in1p;
@@ -102,12 +115,15 @@ always @* begin
       inv0 = invm;
       inexact0 = inexactm;
       div_zero0 = 0;
+      if(done_count == 2)
+        done0 = 1;
+      else
+        done0 = 0;
     end
     2: begin
       out0 = dout;
       ov0 = dov;
       un0 = dun;
-      done0 = ddone;
       in1pa = 0;
       in2pa = 0;
       in1pm = 0;
@@ -122,13 +138,16 @@ always @* begin
       in1ps = 0;
        inv0 = invd;
       inexact0 = inexactd;
-      div_zero0 = div_zerod; 
+      div_zero0 = div_zerod;
+      if(done_count == 6)
+        done0 = 1;
+      else
+        done0 = 0; 
     end
     3: begin
       out0 = sout;
       ov0 = sov;
       un0 = sun;
-      done0 = sdone;
       in1pa = 0;
       in2pa = 0;
       in1pm = 0;
@@ -144,7 +163,10 @@ always @* begin
       inv0 = invs;
       inexact0 = inexacts;
       div_zero0 = 0;
-
+       if(done_count == 7)
+        done0 = 1;
+      else
+        done0 = 0;
     end
     4: begin
       out0 = 0;
@@ -165,13 +187,16 @@ always @* begin
       inv0 = invc;
       inexact0 = inexacta;
       div_zero0 = 0;
+       if(done_count == 1)
+        done0 = 1;
+      else
+        done0 = 0;
     end
 
    default : begin
      out0 = aout;
       ov0= aov;
       un0= aun;
-    done0 = adone;
     in1pa = in1p;
     in2pa = in2p;
     in1pm = 0;
@@ -187,13 +212,70 @@ always @* begin
     inv0 = 0;
     inexact0 = 0;
     div_zero0 = 0;
+    if(done_count == 2)
+        done0 = 1;
+    else
+        done0 = 0;
    end
   endcase
    
 end
   
+assign wmask0 = 4'b1111;
+assign addr0 = addrx; 
 
-  
+always @* begin //memory setup
+	if((done0 && enable && !ld)||(!enable)) begin
+		web0 = 0;
+		csb0 = 0;
+		csb1 = 1;
+		if(done0) 
+		addrx = addr3;
+		else
+		addrx = addr1;
+	end
+	else begin
+		if(done0)
+                addrx = addr3;
+                else
+                addrx = addr1;
+		web0 = 1;
+		csb0 = 0;
+		csb1 = 0;
+	end
+
+end
+
+always @(posedge clk or negedge rstp) begin //load FP registers
+	if(!rstp) begin
+           {in1p,in2p} <= {32'b0,32'b0};
+	end
+	else begin
+	    if(ld) begin
+	 	{in1p,in2p} <= {dout0,dout1};
+	    end
+	    else
+	        {in1p,in2p} <= {in1p,in2p};
+	end
+end
+
+assign din0 = enable?out0:inp; //select data to write to memory
+
+always @(posedge clk or negedge rstp) begin // done counter
+	if(!rstp) begin
+	   done_count <= 0;
+	end
+	else begin
+	if(enable && !done0)
+	   done_count <= done_count +1;
+	else 
+	   done_count <= 0;
+   	end
+
+end
+
+
+
 always @*
 begin  
   {out,ov,un,done,inv,inexact,div_zero,eq,great,less} = {out0,ov0,un0,done0,inv0,inexact0,div_zero0,eq1,great1,less1};
