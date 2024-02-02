@@ -22,7 +22,7 @@
 `include "fp_comp.v"
 `include "fp_add.v"
 `include "fp_sqr.v"
-`include  "sram_1rw1r_32_256_8_sky130.v"
+`include  "sram.v"
 
 module fpu(
 input [31:0] inp, // external input to memory
@@ -33,8 +33,10 @@ input [2:0] round_mp, // rounding mode selector
 output reg [31:0] out,
 output reg ov,un,less,eq,great,done,inv,inexact,div_zero,
 input [2:0] opcode_in, // 1 = mul, 0 = add, 2 = division, 3 = square root, 4 = compare
-input enable,ld // this set to 0 enables the fpu operations, 1 enables write to memory from the inputs
+input enable,ld, // this set to 0 enables the fpu operations, 1 enables write to memory from the inputs
 //ld loads from memory to the fp registers
+input scan_enable,scan_data_in,test_mode,
+output reg scan_data_out
   );
 
  
@@ -55,18 +57,18 @@ wire [3:0] wmask0;
 reg [3:0] done_count;
 
   //add
-  fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.inv(inva),.inexact(inexacta));
+  fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rstp),.round_m(round_mp),.inv(inva),.inexact(inexacta));
   //mul
-  fp_mul mulu(.in1(in1pm),.in2(in2pm),.out(mout),.ov(mov),.un(mun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.inv(invm),.inexact(inexactm));
+  fp_mul mulu(.in1(in1pm),.in2(in2pm),.out(mout),.ov(mov),.un(mun),.clk(clk),.rst(rstp),.round_m(round_mp),.inv(invm),.inexact(inexactm));
   //compare
-  fp_comp com1(.in1(in1pc),.in2(in2pc),.eq(eq0),.great(great0),.less(less0),.act(act),.clk(clk),.rst(rstp),.inv(invc));
+  fp_comp com1(.in1(in1pc),.in2(in2pc),.eq(eq0),.great(great0),.less(less0),.clk(clk),.rst(rstp),.inv(invc));
   // division
-  fp_div dv1(.in1(in1pd),.in2(in2pd),.out(dout),.ov(dov),.un(dun),.rst(rstp),.clk(clk),.round_m(round_mp),.act(act),.inv(invd),.inexact(inexactd),.div_zero(div_zerod));
+  fp_div dv1(.in1(in1pd),.in2(in2pd),.out(dout),.ov(dov),.un(dun),.rst(rstp),.clk(clk),.round_m(round_mp),.inv(invd),.inexact(inexactd),.div_zero(div_zerod));
   //square root
-  fp_sqr   sqr1(.in1(in1ps),.out(sout),.ov(sov),.un(sun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.inv(invs),.inexact(inexacts));
+  fp_sqr   sqr1(.in1(in1ps),.out(sout),.ov(sov),.un(sun),.clk(clk),.rst(rstp),.round_m(round_mp),.inv(invs),.inexact(inexacts));
 
  // Sram
- sram_1rw1r_32_256_8_sky130 sram1(.clk0(clk),.clk1(clk),.csb0(csb0),.web0(web0),.wmask0(wmask0),.addr0(addr0),.addr1(addr2),.din0(din0),.dout0(dout0),.dout1(dout1),.csb1(csb1)
+ sram sram1(.clk(clk),.csb0(csb0),.web0(web0),.wmask0(wmask0),.addr0(addr0),.addr1(addr2),.din0(din0),.dout0(dout0),.dout1(dout1),.csb1(csb1)
 );
 
 always @(posedge clk or negedge rstp) begin //sample opcode

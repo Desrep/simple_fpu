@@ -16,12 +16,12 @@
 //
 
 `include "special_characters.v"
-module fp_comp(in1,in2,eq,great,less,act,clk,rst,inv);
+module fp_comp(in1,in2,eq,great,less,clk,rst,inv);
   parameter W = 32;
   parameter M = 22;
   parameter E = 30;
   input [31:0] in1,in2;
-  input act,clk,rst;
+  input clk,rst;
   output reg eq,great,less,inv;
   reg   eq0,great0,less0,done0;
   wire [E-M-1:0] E1,E2;

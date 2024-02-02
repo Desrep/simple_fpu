@@ -19,7 +19,7 @@
 // FP add for 32 bit numbers
 //5 rounding modes implemented
 `include "special_characters.v"
-module fp_add(in1,in2,out,ov,un,clk,rst,round_m,act,inv,inexact);
+module fp_add(in1,in2,out,ov,un,clk,rst,round_m,inv,inexact);
   parameter W = 32;
   parameter M = 22;
   parameter E = 30;
@@ -28,7 +28,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,act,inv,inexact);
   input [W-1:0] in1;
   input [W-1:0] in2;
   input [2:0] round_m;
-  input clk,rst,act;
+  input clk,rst;
   output reg [W-1:0] out;
   output reg ov,un,inv,inexact;
   wire [E-M-1:0] E1,E2;
@@ -293,7 +293,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,act,inv,inexact);
   // determine overflow or underflow
   always @* begin
 
-    {ov0,un0} = {(E02>254|Eround>254)?1:0,(E02<1|Eround<1)?1:0};
+    {ov0,un0} = {((E02>254)|(Eround>254))?1'b1:1'b0,((E02<1)|(Eround<1))?1'b1:1'b0};
 
   end
 

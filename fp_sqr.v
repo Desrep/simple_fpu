@@ -16,14 +16,14 @@
 //5 rounding modes implemented
 `include "special_characters.v"
 `include "sqrt.v"
-module fp_sqr(in1,out,ov,un,clk,rst,round_m,act,inv,inexact);
+module fp_sqr(in1,out,ov,un,clk,rst,round_m,inv,inexact);
   parameter W = 32;
   parameter M = 22;
   parameter E = 30;
   parameter IWID=M+2;
   parameter OWID = M+1;
   input clk;
-  input rst,act;
+  input rst;
   input [W-1:0] in1;
   input [2:0] round_m; // rounding mode selector
   output reg [W-1:0] out;
@@ -101,13 +101,13 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,act,inv,inexact);
   //calculate exponent
 
 
-  sqrt  sq(.in({1'b0,M1}),.out(M0r),.sticky(t),.clk(clk),.rst(rst),.done(done0)); // add one more bit than the Width to be able to perform the arithmetic inside sqrt
+  sqrt  sq(.in({1'b0,M1}),.out(M0r),.sticky(t),.clk(clk),.rst(rst)); // add one more bit than the Width to be able to perform the arithmetic inside sqrt
 
   always @(posedge clk or negedge rst) begin// pipeline?????
 	if(!rst)
     {M00r,done0_r} <= {26'b0,1'b0};
 	else
-    {M00r,done0_r} <= {M0r,done0};
+    {M00r,done0_r} <= {M0r,1'b0};
 
  end
 
@@ -209,7 +209,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,act,inv,inexact);
 
     // determine overflow or underflow
   always @* begin
-    {ov0,un0} = {(E0>254|E0>254)?1'b1:1'b0,(E0<1|E0<1)?1'b1:1'b0};
+    {ov0,un0} = {((E0>254)|(E0>254))?1'b1:1'b0,((E0<1)|(E0<1))?1'b1:1'b0};
   end
 
 

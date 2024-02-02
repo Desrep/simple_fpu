@@ -18,14 +18,14 @@
 //5 rounding modes implemented
 `include "special_characters.v"
 `include "divide_r.v"
-module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,inv,div_zero,inexact);
+module fp_div(in1,in2,out,ov,un,clk,rst,round_m,inv,div_zero,inexact);
   parameter W = 32;
   parameter M = 22;
   parameter E = 30;
   parameter IWID=M+4;
   parameter OWID = M+1;
   input clk;
-  input rst,act;
+  input rst;
   input [W-1:0] in1;
   input [2:0] round_m; // rounding mode selector
   input [W-1:0] in2;
@@ -263,7 +263,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,inv,div_zero,inexact);
 
     // determine overflow or underflow
   always @* begin
-    {ov0,un0} = {(E01>254|E0>254)?1'b1:1'b0,(E01<1|E0<1)?1'b1:1'b0};
+    {ov0,un0} = {((E01>254)|(E0>254))?1'b1:1'b0,((E01<1)|(E0<1))?1'b1:1'b0};
   end
 
 

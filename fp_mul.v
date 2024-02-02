@@ -19,14 +19,14 @@
 // 5 rounding modes implemented
 `include "special_characters.v"
 `include "mulxbit.v"
-module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,act,inv,inexact);
+module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,inv,inexact);
   parameter W = 32;
   parameter M = 22;
   parameter E = 30;
   parameter IWID=M+4;
   parameter OWID = M+1;
   input clk;
-  input rst,act;
+  input rst;
   input [W-1:0] in1;
   input [2:0] round_m; // rounding mode selector
   input [W-1:0] in2;
@@ -113,7 +113,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,act,inv,inexact);
 
 
   // multiplication block (include hidden bit)
-  mulxbit  m1 (.in1(M1),.in2(M2),.out(M00),.done(done0));
+  mulxbit  m1 (.in1(M1),.in2(M2),.out(M00));
   //assign M00 = M1*M2;
 
 
@@ -121,7 +121,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,act,inv,inexact);
      if(!rst) 
      {M000,done0_reg} <= {48'b0,1'b0};
      else
-     {M000,done0_reg} <= {M00,done0};
+     {M000,done0_reg} <= {M00,1'b0};
   end
  
     always @*
@@ -232,7 +232,7 @@ module fp_mul(in1,in2,out,ov,un,clk,rst,round_m,act,inv,inexact);
 
     // determine overflow or underflow
   always @* begin
-    {ov0,un0} = {(E0>254|Eround>254)?1'b1:1'b0,(E0<1|Eround<1)?1'b1:1'b0};
+    {ov0,un0} = {((E0>254)|(Eround>254))?1'b1:1'b0,((E0<1)|(Eround<1))?1'b1:1'b0};
   end
 
 
