@@ -1,4 +1,4 @@
-v# simple_fpu
+# simple_fpu
 Fpu RTL for the IEEE 754 single precision standard, it includes addition, multiplication, division, square root and fp compare. It has some exception management. It's a very simple implementation using iterative subtraction algorithms for the division and square root units, the multiplication unit uses a parallel shift and addition of various terms, the rest of terms are added sequentially. The number of pipeline stages for the division and square root can be controlled with the STAGES parameter. The project is intended to be friendly for integration in the caravel project but ultimately the goal is to integrate it with a risc v imlementation so that the code can use hardware fp operations.
 ## FPU.v
 This file is actually only used for instantiation of the units mostly for testing purposes but it still works as the top module, this code can be easily modified or replaced as you wish.
