@@ -55,15 +55,15 @@ wire [3:0] wmask0;
 reg [3:0] done_count;
 
   //add
-  fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.done(adone),.inv(inva),.inexact(inexacta));
+  fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.inv(inva),.inexact(inexacta));
   //mul
-  fp_mul mulu(.in1(in1pm),.in2(in2pm),.out(mout),.ov(mov),.un(mun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.done(mdone),.inv(invm),.inexact(inexactm));
+  fp_mul mulu(.in1(in1pm),.in2(in2pm),.out(mout),.ov(mov),.un(mun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.inv(invm),.inexact(inexactm));
   //compare
-  fp_comp com1(.in1(in1pc),.in2(in2pc),.eq(eq0),.great(great0),.less(less0),.act(act),.done(cdone),.clk(clk),.rst(rstp),.inv(invc));
+  fp_comp com1(.in1(in1pc),.in2(in2pc),.eq(eq0),.great(great0),.less(less0),.act(act),.clk(clk),.rst(rstp),.inv(invc));
   // division
-  fp_div dv1(.in1(in1pd),.in2(in2pd),.out(dout),.ov(dov),.un(dun),.rst(rstp),.clk(clk),.round_m(round_mp),.act(act),.done(ddone),.inv(invd),.inexact(inexactd),.div_zero(div_zerod));
+  fp_div dv1(.in1(in1pd),.in2(in2pd),.out(dout),.ov(dov),.un(dun),.rst(rstp),.clk(clk),.round_m(round_mp),.act(act),.inv(invd),.inexact(inexactd),.div_zero(div_zerod));
   //square root
-  fp_sqr   sqr1(.in1(in1ps),.out(sout),.ov(sov),.un(sun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.done(sdone),.inv(invs),.inexact(inexacts));
+  fp_sqr   sqr1(.in1(in1ps),.out(sout),.ov(sov),.un(sun),.clk(clk),.rst(rstp),.round_m(round_mp),.act(act),.inv(invs),.inexact(inexacts));
 
  // Sram
  sram_1rw1r_32_256_8_sky130 sram1(.clk0(clk),.clk1(clk),.csb0(csb0),.web0(web0),.wmask0(wmask0),.addr0(addr0),.addr1(addr2),.din0(din0),.dout0(dout0),.dout1(dout1),.csb1(csb1)
@@ -249,7 +249,7 @@ assign din0 = enable?out0:inp; //select data to write to memory
 
 always @(posedge clk or negedge rstp) begin // done counter
 	if(!rstp) begin
-	   done_count <= 0;
+	   {done_count,done0} <= {4'b0000,1'b0};
 	end
 	else begin
      if(enable) begin

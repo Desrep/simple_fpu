@@ -16,13 +16,13 @@
 //
 
 `include "special_characters.v"
-module fp_comp(in1,in2,eq,great,less,act,done,clk,rst,inv);
+module fp_comp(in1,in2,eq,great,less,act,clk,rst,inv);
   parameter W = 32;
   parameter M = 22;
   parameter E = 30;
   input [31:0] in1,in2;
   input act,clk,rst;
-  output reg eq,great,less,done,inv;
+  output reg eq,great,less,inv;
   reg   eq0,great0,less0,done0;
   wire [E-M-1:0] E1,E2;
   wire [M:0] M1,M2;
@@ -115,12 +115,12 @@ module fp_comp(in1,in2,eq,great,less,act,done,clk,rst,inv);
 
   always @(posedge clk or negedge rst) begin
     if(!rst)
-    	{less,eq,great,done,inv} <= {1'b0,1'b0,1'b0,1'b0,1'b0};
+    	{less,eq,great,inv} <= {1'b0,1'b0,1'b0,1'b0};
     else begin
       if(!forward)
-      		{less,eq,great,done,inv} <= {less0,eq0,great0,done0,1'b0};
+      		{less,eq,great,inv} <= {less0,eq0,great0,1'b0};
       else
-    	  {less,eq,great,done,inv} <= {less_f,eq_f,great_f,done_f,inv_f};
+    	  {less,eq,great,inv} <= {less_f,eq_f,great_f,inv_f};
       end
   end
 

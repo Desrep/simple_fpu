@@ -15,7 +15,8 @@
 // fp square root of 2 32 bit fp numbers
 //5 rounding modes implemented
 `include "special_characters.v"
-module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
+`include "sqrt.v"
+module fp_sqr(in1,out,ov,un,clk,rst,round_m,act,inv,inexact);
   parameter W = 32;
   parameter M = 22;
   parameter E = 30;
@@ -26,7 +27,7 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   input [W-1:0] in1;
   input [2:0] round_m; // rounding mode selector
   output reg [W-1:0] out;
-  output reg ov,un,done,inv,inexact; // flags (inv,ov,un are exception flags)
+  output reg ov,un,inv,inexact; // flags (inv,ov,un are exception flags)
   wire [E-M-1:0] E1;
   reg [E-M-1:0] Ef1;
   reg [E-M-1:0] E0,E01,E02,E001,Eround;
@@ -214,12 +215,12 @@ module fp_sqr(in1,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
   always @(posedge clk or negedge rst)  begin// output the values and exceptions
       if(!rst)
-      {out[M:0],out[E:M+1],out[W-1],ov,un,done,inv,inexact} <= {1'b0,8'b0,23'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
+      {out[M:0],out[E:M+1],out[W-1],ov,un,inv,inexact} <= {1'b0,8'b0,23'b0,1'b0,1'b0,1'b0,1'b0};
      else begin
        if(!forward)
-       {out[M:0],out[E:M+1],out[W-1],ov,un,done,inv,inexact} <= {M0,E0,S0,ov0,un0,done1,1'b0,inexact0};
+       {out[M:0],out[E:M+1],out[W-1],ov,un,inv,inexact} <= {M0,E0,S0,ov0,un0,1'b0,inexact0};
        else
-        {out,ov,un,done,inv,inexact} <= {out_f,ov_f,un_f,done_f,inv_f,inexact_f};
+        {out,ov,un,inv,inexact} <= {out_f,ov_f,un_f,inv_f,inexact_f};
      end
   end
 

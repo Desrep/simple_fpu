@@ -18,7 +18,7 @@
 //5 rounding modes implemented
 `include "special_characters.v"
 `include "divide_r.v"
-module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
+module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,inv,div_zero,inexact);
   parameter W = 32;
   parameter M = 22;
   parameter E = 30;
@@ -30,7 +30,7 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
   input [2:0] round_m; // rounding mode selector
   input [W-1:0] in2;
   output reg [W-1:0] out;
-  output reg ov,un,done,inv,div_zero,inexact;
+  output reg ov,un,inv,div_zero,inexact;
   wire [E-M-1:0] E1,E2;
   reg [E-M-1:0] Ef1,Ef2;
   reg [E-M-1:0] E0,E01,E02,E001,Eround;
@@ -269,14 +269,14 @@ module fp_div(in1,in2,out,ov,un,clk,rst,round_m,act,done,inv,div_zero,inexact);
 
   always @(posedge clk or negedge rst)  begin// output the values and exceptions
     if(!rst) begin
-      {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,div_zero,inexact} <= {1'b0,8'b0,23'b0,1'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
+      {out[W-1],out[E:M+1],out[M:0],ov,un,inv,div_zero,inexact} <= {1'b0,8'b0,23'b0,1'b0,1'b0,1'b0,1'b0,1'b0};
     end
 
     else begin
       if(!forward)
-      {out[M:0],out[E:M+1],out[W-1],ov,un,done,inv,div_zero,inexact} <= {M0,E0,S0,ov0,un0,done1,1'b0,1'b0,inexact0};
+      {out[M:0],out[E:M+1],out[W-1],ov,un,inv,div_zero,inexact} <= {M0,E0,S0,ov0,un0,1'b0,1'b0,inexact0};
       else
-      	{out,ov,un,done,inv,div_zero,inexact} <= {out_f,ov_f,un_f,done_f,inv_f,div_zero_f,inexact_f};
+      	{out,ov,un,inv,div_zero,inexact} <= {out_f,ov_f,un_f,inv_f,div_zero_f,inexact_f};
     end
 
   end

@@ -19,7 +19,7 @@
 // FP add for 32 bit numbers
 //5 rounding modes implemented
 `include "special_characters.v"
-module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
+module fp_add(in1,in2,out,ov,un,clk,rst,round_m,act,inv,inexact);
   parameter W = 32;
   parameter M = 22;
   parameter E = 30;
@@ -30,7 +30,7 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
   input [2:0] round_m;
   input clk,rst,act;
   output reg [W-1:0] out;
-  output reg ov,un,done,inv,inexact;
+  output reg ov,un,inv,inexact;
   wire [E-M-1:0] E1,E2;
   reg [E-M-1:0] E0,E02,E002,E10,E20,Eround;
   reg [M+3:0] M1,M2,M10,M20,Mtemp;
@@ -299,12 +299,12 @@ module fp_add(in1,in2,out,ov,un,clk,rst,round_m,done,act,inv,inexact);
 
   always @(posedge clk or negedge rst) begin // output values
       if (!rst)
-     	 {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {1'b0,8'b0,23'b0,1'b0,1'b0,1'b1,1'b0,1'b0};
+     	 {out[W-1],out[E:M+1],out[M:0],ov,un,inv,inexact} <= {1'b0,8'b0,23'b0,1'b0,1'b0,1'b0,1'b0};
       else begin
         if(!forward)
-        {out[W-1],out[E:M+1],out[M:0],ov,un,done,inv,inexact} <= {S0,Eround,M0,ov0,un0,done1,1'b0,inexact0};
+        {out[W-1],out[E:M+1],out[M:0],ov,un,inv,inexact} <= {S0,Eround,M0,ov0,un0,1'b0,inexact0};
         else
-        {out,ov,un,done,inv,inexact} <= {out_f,ov_f,un_f,done_f,inv_f,inexact_f};
+        {out,ov,un,inv,inexact} <= {out_f,ov_f,un_f,inv_f,inexact_f};
       end
 
   end
