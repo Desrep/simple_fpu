@@ -32,7 +32,7 @@ input rstp,act,
 input [2:0] round_mp, // rounding mode selector
 output reg [31:0] out,
 output reg ov,un,less,eq,great,done,inv,inexact,div_zero,
-input [2:0] opcode, // 1 = mul, 0 = add, 2 = division, 3 = square root, 4 = compare
+input [2:0] opcode_in, // 1 = mul, 0 = add, 2 = division, 3 = square root, 4 = compare
 input enable,ld // this set to 0 enables the fpu operations, 1 enables write to memory from the inputs
 //ld loads from memory to the fp registers
   );
@@ -43,6 +43,7 @@ reg [31:0] in1pa,in2pa,in1pm,in2pm,in1pc,in2pc,in1pd,in2pd,in1ps,in1p,in2p;
 wire [31:0] aout,mout,dout,sout,din0,dout0,dout1;
 wire [4:0] addr0;
 reg [4:0] addrx;
+reg [2:0] opcode; // opcode register
 wire aov,aun,mov,mun,dov,dun,sov,sun,eq0,less0,great0;
 wire inva,invm,invd,invs,div_zerod,invc;
 wire inexacta,inexactm,inexactd,inexacts;
@@ -68,6 +69,15 @@ reg [3:0] done_count;
  sram_1rw1r_32_256_8_sky130 sram1(.clk0(clk),.clk1(clk),.csb0(csb0),.web0(web0),.wmask0(wmask0),.addr0(addr0),.addr1(addr2),.din0(din0),.dout0(dout0),.dout1(dout1),.csb1(csb1)
 );
 
+always @(posedge clk or negedge rstp) begin //sample opcode
+	if(!rstp) begin
+	     opcode <= 0;
+        end
+	else begin
+	     opcode <= opcode_in;
+	end
+end
+
   // Select inputs and outputs depending on the operation
 always @* begin
     
@@ -91,10 +101,6 @@ always @* begin
       inv0 = inva;
       inexact0 = inexacta;
       div_zero0 = 0;
-      if(done_count == 2)
-     	done0 = 1;
-      else
-        done0 = 0;
     end
     1: begin
       out0 = mout;
@@ -115,10 +121,6 @@ always @* begin
       inv0 = invm;
       inexact0 = inexactm;
       div_zero0 = 0;
-      if(done_count == 2)
-        done0 = 1;
-      else
-        done0 = 0;
     end
     2: begin
       out0 = dout;
@@ -139,10 +141,6 @@ always @* begin
        inv0 = invd;
       inexact0 = inexactd;
       div_zero0 = div_zerod;
-      if(done_count == 6)
-        done0 = 1;
-      else
-        done0 = 0; 
     end
     3: begin
       out0 = sout;
@@ -163,10 +161,6 @@ always @* begin
       inv0 = invs;
       inexact0 = inexacts;
       div_zero0 = 0;
-       if(done_count == 7)
-        done0 = 1;
-      else
-        done0 = 0;
     end
     4: begin
       out0 = 0;
@@ -187,10 +181,6 @@ always @* begin
       inv0 = invc;
       inexact0 = inexacta;
       div_zero0 = 0;
-       if(done_count == 1)
-        done0 = 1;
-      else
-        done0 = 0;
     end
 
    default : begin
@@ -212,10 +202,6 @@ always @* begin
     inv0 = 0;
     inexact0 = 0;
     div_zero0 = 0;
-    if(done_count == 2)
-        done0 = 1;
-    else
-        done0 = 0;
    end
   endcase
    
@@ -266,10 +252,45 @@ always @(posedge clk or negedge rstp) begin // done counter
 	   done_count <= 0;
 	end
 	else begin
-	if(enable && !done0)
-	   done_count <= done_count +1;
+     if(enable) begin
+	   case (opcode)
+	      0:begin
+		  if(done_count == 2)
+                  	{done_count,done0} <= {4'b0000,1'b1};
+                  else
+                  	{done_count,done0} <= {done_count+4'b0001,1'b0};
+		 end
+	      1:begin
+		  if(done_count == 2)
+			  {done_count,done0} <= {4'b0000,1'b1};
+                  else
+			  {done_count,done0} <= {done_count+4'b0001,1'b0};
+	      	end
+		2:begin
+		  if(done_count == 7)
+			  {done_count,done0} <= {4'b0000,1'b1};
+                  else
+			  {done_count,done0} <= {done_count+4'b0001,1'b0};
+		  end
+		3:begin
+		  if(done_count == 7)
+			  {done_count,done0} <= {4'b0000,1'b1};
+                  else
+			  {done_count,done0} <= {done_count+4'b0001,1'b0};
+		  end
+		4:begin
+	        if(done_count == 1)
+			{done_count,done0} <= {4'b0000,1'b1};
+                  else
+			{done_count,done0} <= {done_count+4'b0001,1'b0};
+		 end
+		 default:begin
+		     {done_count,done0} <= {done_count+4'b0001,1'b0};
+	     	  end
+		endcase
+	      end
 	else 
-	   done_count <= 0;
+	   {done_count,done0} <= {4'b0000,1'b0};
    	end
 
 end
