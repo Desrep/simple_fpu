@@ -1,40 +1,29 @@
-# simple_fpu
+v# simple_fpu
 Fpu RTL for the IEEE 754 single precision standard, it includes addition, multiplication, division, square root and fp compare. It has some exception management. It's a very simple implementation using iterative subtraction algorithms for the division and square root units, the multiplication unit uses a parallel shift and addition of various terms, the rest of terms are added sequentially. The number of pipeline stages for the division and square root can be controlled with the STAGES parameter. The project is intended to be friendly for integration in the caravel project but ultimately the goal is to integrate it with a risc v imlementation so that the code can use hardware fp operations.
 ## FPU.v
 This file is actually only used for instantiation of the units mostly for testing purposes but it still works as the top module, this code can be easily modified or replaced as you wish.
 The signals do the following 
 
-in1p is the first operand--------input
 
-in2p is the second operand--------input
+| Singal | Type | Description |
+| --- | --- |---|
+| in1p | input | first operand |
+| in2p | input | first operand |
+| rstp | input | reset signal |
+| clk  | input |The clock |
+| round_mp  | input | Rounding mode selector, the codes can be found in special_characters.v |
+| ov | output | overflow flag output |
+| un  | output | the underflow flag output |
+|great  | output | ndicates if in1p is greater than in2p (if in1p > in2p then great = 1) (compare operation) |
+| less  | output |indicates if in2p is less than in2p (if in2p < in2p then less = 1)  (compare operation) |
+| eq  | output | indicates in1p and in2p are equal  (compare operation) |
+| inexact | output |  is the flag indicating if the operation completed is inexac |
+| inv | output | is the falg indicating if the operation  completed is invalid |
+| div_zero | output | when division is selected this flag indicates if in2p is zero (meaning that in1p/in2p is a division by zero) |
+| done | output | is a flag indicating if the current operation is finished, this is a synchronous signal |
+| opcode | input | operation selection |
 
-rstp is the reset signal----------input
-
-clk is the clock----------------input
-
-round_mp is the rounding mode selector, the codes can be found in special_characters.v--------input
-
-out is the output--------output
-
-ov is the overflow flag output--------output
-
-un is the underflow flag output--------output
-
-great indicates if in1p is greater than in2p (if in1p > in2p then great = 1) (compare operation)--------output
-
-less indicates if in2p is less than in2p (if in2p < in2p then less = 1)  (compare operation)--------output
-
-eq indicates in1p and in2p are equal  (compare operation)--------output
-
-inexact is the flag indicating if the operation completed is inexact--------output
-
-inv is the falg indicating if the operation  completed is invalid--------output
-
-div_zero, when division is selected this flag indicates if in2p is zero (meaning that in1p/in2p is a division by zero)--------output
-
-done is a flag indicating if the current operation is finished, this is a synchronous signal --------output
-
-opcode is the operation selection------input
+The opcode is the operation is encoded as follows
 
          00 = addition and compare
          
@@ -43,6 +32,8 @@ opcode is the operation selection------input
          10 = division
          
          11 = square root
+
+         100 = compare
          
          
 For square root the operand used is only in1p
