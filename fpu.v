@@ -54,7 +54,7 @@ wire adone,mdone,cdone,ddone,sdone;
 reg rsta,rstm,rstd,rstc,rsts,eq1,less1,great1;
 reg csb0,csb1,web0;
 wire [3:0] wmask0;
-reg [3:0] done_count;
+reg [2:0] done_count;
 
   //add
   fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rstp),.round_m(round_mp),.inv(inva),.inexact(inexacta));
@@ -251,48 +251,48 @@ assign din0 = enable?out0:inp; //select data to write to memory
 
 always @(posedge clk or negedge rstp) begin // done counter
 	if(!rstp) begin
-	   {done_count,done0} <= {4'b0000,1'b0};
+	   {done_count,done0} <= {3'b000,1'b0};
 	end
 	else begin
      if(enable) begin
 	   case (opcode)
 	      0:begin
 		  if(done_count == 2)
-                  	{done_count,done0} <= {4'b0000,1'b1};
+                  	{done_count,done0} <= {3'b000,1'b1};
                   else
-                  	{done_count,done0} <= {done_count+4'b0001,1'b0};
+                  	{done_count,done0} <= {done_count+3'b001,1'b0};
 		 end
 	      1:begin
 		  if(done_count == 2)
-			  {done_count,done0} <= {4'b0000,1'b1};
+			  {done_count,done0} <= {3'b000,1'b1};
                   else
-			  {done_count,done0} <= {done_count+4'b0001,1'b0};
+			  {done_count,done0} <= {done_count+3'b001,1'b0};
 	      	end
 		2:begin
 		  if(done_count == 7)
-			  {done_count,done0} <= {4'b0000,1'b1};
+			  {done_count,done0} <= {3'b000,1'b1};
                   else
-			  {done_count,done0} <= {done_count+4'b0001,1'b0};
+			  {done_count,done0} <= {done_count+3'b001,1'b0};
 		  end
 		3:begin
 		  if(done_count == 7)
-			  {done_count,done0} <= {4'b0000,1'b1};
+			  {done_count,done0} <= {3'b000,1'b1};
                   else
-			  {done_count,done0} <= {done_count+4'b0001,1'b0};
+			  {done_count,done0} <= {done_count+3'b001,1'b0};
 		  end
 		4:begin
 	        if(done_count == 1)
-			{done_count,done0} <= {4'b0000,1'b1};
+			{done_count,done0} <= {3'b000,1'b1};
                   else
-			{done_count,done0} <= {done_count+4'b0001,1'b0};
+			{done_count,done0} <= {done_count+3'b001,1'b0};
 		 end
 		 default:begin
-		     {done_count,done0} <= {done_count+4'b0001,1'b0};
+		     {done_count,done0} <= {done_count+3'b001,1'b0};
 	     	  end
 		endcase
 	      end
 	else 
-	   {done_count,done0} <= {4'b0000,1'b0};
+	   {done_count,done0} <= {3'b000,1'b0};
    	end
 
 end
