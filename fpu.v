@@ -23,11 +23,16 @@
 `include "fp_add.v"
 `include "fp_sqr.v"
 `include  "sram.v"
+`include "mbist.v"
+`include "tapc.v"
+`include "ir_decoder.v"
 
 module fpu(
-input [31:0] inp, // external input to memory
 input clk,
+//memory
+input [31:0] inp, // external input to memory
 input [4:0] addr1,addr2,addr3, // addr1 for op1, addr2 for op2, addr3 to store the output
+//fpu
 input rstp,act,
 input [2:0] round_mp, // rounding mode selector
 output reg [31:0] out,
@@ -35,26 +40,63 @@ output reg ov,un,less,eq,great,done,inv,inexact,div_zero,
 input [2:0] opcode_in, // 1 = mul, 0 = add, 2 = division, 3 = square root, 4 = compare
 input enable,ld, // this set to 0 enables the fpu operations, 1 enables write to memory from the inputs
 //ld loads from memory to the fp registers
-input scan_enable,scan_data_in,test_mode,
-output reg scan_data_out
+input test_mode,
+
+//tap signals
+input tdi,tms,tck,trst,tdo,
+output reg td,
+
+//debug por ahora
+input [3:0] ir,
+input [10:0] mbist_inst_reg
+
+
   );
 
+
+
+localparam width = 32;
+localparam addr_width = 5;
  
+// fpu signals
 reg [31:0] out0;
 reg [31:0] in1pa,in2pa,in1pm,in2pm,in1pc,in2pc,in1pd,in2pd,in1ps,in1p,in2p;
-wire [31:0] aout,mout,dout,sout,din0,dout0,dout1;
-wire [4:0] addr0;
-reg [4:0] addrx;
+wire [31:0] aout,mout,dout,sout;
 reg [2:0] opcode; // opcode register
 wire aov,aun,mov,mun,dov,dun,sov,sun,eq0,less0,great0;
 wire inva,invm,invd,invs,div_zerod,invc;
 wire inexacta,inexactm,inexactd,inexacts;
 reg ov0,un0,done0,inv0,inexact0,div_zero0;
 wire adone,mdone,cdone,ddone,sdone;
-reg rsta,rstm,rstd,rstc,rsts,eq1,less1,great1;
+reg eq1,less1,great1;
+reg [2:0] done_count;
+
+// memory signals
+wire [4:0] fpu_addr0;
+wire [4:0] addr0;
+reg [4:0] addrx;
 reg csb0,csb1,web0;
 wire [3:0] wmask0;
-reg [2:0] done_count;
+reg fpu_csb0,fpu_csb1,fpu_web0;
+wire [31:0] din0, fpu_din0,dout0,dout1;
+wire sram_clk;
+
+// tap signals
+wire ckdr,sdr,usr,ckir,sir,uir,tapenable,taprst,tapselect;
+
+//mbist signals
+wire mbist_write, mbist_read,mbist_web;
+wire [width -1:0] mbist_output_data;
+wire [addr_width-1:0] mbist_address;
+wire [10:0] mbist_inst_reg_out;
+//wire [10:0] mbist_inst_reg;
+
+//decoder signals
+wire sample,bypass,preload,extest,intest,runmbist,runscan,runlbist,progmbist,proglbist;
+//wire [3:0] ir;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
   //add
   fp_add addu(.in1(in1pa),.in2(in2pa),.out(aout),.ov(aov),.un(aun),.clk(clk),.rst(rstp),.round_m(round_mp),.inv(inva),.inexact(inexacta));
@@ -68,8 +110,25 @@ reg [2:0] done_count;
   fp_sqr   sqr1(.in1(in1ps),.out(sout),.ov(sov),.un(sun),.clk(clk),.rst(rstp),.round_m(round_mp),.inv(invs),.inexact(inexacts));
 
  // Sram
- sram sram1(.clk(clk),.csb0(csb0),.web0(web0),.wmask0(wmask0),.addr0(addr0),.addr1(addr2),.din0(din0),.dout0(dout0),.dout1(dout1),.csb1(csb1)
-);
+ sram sram1(.clk(sram_clk),.csb0(csb0),.web0(web0),.wmask0(wmask0),.addr0(addr0),.addr1(addr2),.din0(din0),.dout0(dout0),.dout1(dout1),.csb1(csb1));
+
+ mbist mb(.reg_input(mbist_inst_reg),.clk(tck),.rst(rstp),.reg_out(mbist_inst_reg_out),.write(mbist_write),.read(mbist_read),.addr(mbist_address),.input_data(dout0),.output_data(mbist_output_data),.web(mbist_web));
+
+
+tapc tc1 (.tms(tms),.trst(rstp),.tck(tck),.clockdr(ckdr),.shiftdr(sdr),.updatedr(udr),.clockir(ckir),.shiftir(sir),.updateir(uir),.enable(tapenable),.rst(taprst),.select(tapselect));
+
+ir_decoder ird1 (.ir_in(ir),.sample(sample),.bypass(bypass),.preload(preload),.extest(extest),.intest(intest),.runmbist(runmbist),.runscan(runscan),.runlbist(runlbist),.progmbist(progmbist),.proglbist(proglbist));
+
+
+//mbist muxes
+assign csb0 = (runmbist)?1'b0:fpu_csb0;
+assign web0 = (runmbist)?mbist_web:fpu_web0;
+assign din0 = (runmbist)?mbist_output_data:fpu_din0;
+assign addr0 = (runmbist)?mbist_address:addrx;
+assign csb1 = (runmbist)?1'b1:fpu_csb1;
+assign sram_clk = (runmbist)?tck:clk;
+/////
+
 
 always @(posedge clk or negedge rstp) begin //sample opcode
 	if(!rstp) begin
@@ -210,13 +269,12 @@ always @* begin
 end
   
 assign wmask0 = 4'b1111;
-assign addr0 = addrx; 
 
 always @* begin //memory setup
 	if((done0 && enable && !ld)||(!enable)) begin
-		web0 = 0;
-		csb0 = 0;
-		csb1 = 1;
+		fpu_web0 = 0;
+		fpu_csb0 = 0;
+		fpu_csb1 = 1;
 		if(done0) 
 		addrx = addr3;
 		else
@@ -227,9 +285,9 @@ always @* begin //memory setup
                 addrx = addr3;
                 else
                 addrx = addr1;
-		web0 = 1;
-		csb0 = 0;
-		csb1 = 0;
+		fpu_web0 = 1;
+		fpu_csb0 = 0;
+		fpu_csb1 = 0;
 	end
 
 end
@@ -247,7 +305,7 @@ always @(posedge clk or negedge rstp) begin //load FP registers
 	end
 end
 
-assign din0 = enable?out0:inp; //select data to write to memory
+assign fpu_din0 = enable?out0:inp; //select data to write to memory
 
 always @(posedge clk or negedge rstp) begin // done counter
 	if(!rstp) begin
