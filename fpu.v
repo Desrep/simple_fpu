@@ -48,12 +48,7 @@ input test_mode,
 
 //tap signals
 input tdi,tms,tck,trst,tdo,
-output reg td,
-
-//debug por ahora
-input [10:0] mbist_inst_reg
-
-
+output reg td
   );
 
 
@@ -98,9 +93,10 @@ reg fpu_csb0,fpu_csb1,fpu_web0;
 wire [31:0] din0, fpu_din0,dout0,dout1;
 wire sram_clk;
 
-// tap signals
+// tap signals and decoder signals
 wire ckdr,sdr,usr,ckir,sir,uir,tapenable,taprst,tapselect;
 reg [3:0] ir;
+reg [10:0] mbist_ir;
 
 //mbist signals
 wire mbist_write, mbist_read,mbist_web;
@@ -130,7 +126,7 @@ wire sample,bypass,preload,extest,intest,runmbist,runscan,runlbist,progmbist,pro
  // Sram
  sram sram1(.clk(sram_clk),.csb0(csb0),.web0(web0),.wmask0(wmask0),.addr0(addr0),.addr1(addr2),.din0(din0),.dout0(dout0),.dout1(dout1),.csb1(csb1));
 
- mbist mb(.reg_input(mbist_inst_reg),.clk(tck),.rst(rstp),.reg_out(mbist_inst_reg_out),.write(mbist_write),.read(mbist_read),.addr(mbist_address),.input_data(dout0),.output_data(mbist_output_data),.web(mbist_web));
+ mbist mb(.reg_input(mbist_ir),.clk(tck),.rst(rstp),.reg_out(mbist_inst_reg_out),.write(mbist_write),.read(mbist_read),.addr(mbist_address),.input_data(dout0),.output_data(mbist_output_data),.web(mbist_web));
 
 
 tapc tc1 (.tms(tms),.trst(rstp),.tck(tck),.clockdr(ckdr),.shiftdr(sdr),.updatedr(udr),.clockir(ckir),.shiftir(sir),.updateir(uir),.enable(tapenable),.rst(taprst),.select(tapselect));
@@ -139,15 +135,15 @@ ir_decoder ird1 (.ir_in(ir),.sample(sample),.bypass(bypass),.preload(preload),.e
 
 
 //mbist muxes
-assign csb0 = (runmbist)?1'b0:fpu_csb0;
-assign web0 = (runmbist)?mbist_web:fpu_web0;
-assign din0 = (runmbist)?mbist_output_data:fpu_din0;
-assign addr0 = (runmbist)?mbist_address:addrx;
-assign csb1 = (runmbist)?1'b1:fpu_csb1;
-assign sram_clk = (runmbist)?tck:clk;
+assign csb0 = (progmbist&!sdr)?1'b0:fpu_csb0;
+assign web0 = (progmbist&!sdr)?mbist_web:fpu_web0;
+assign din0 = (progmbist&!sdr)?mbist_output_data:fpu_din0;
+assign addr0 = (progmbist&!sdr)?mbist_address:addrx;
+assign csb1 = (progmbist&!sdr)?1'b1:fpu_csb1;
+assign sram_clk = (progmbist&!sdr)?tck:clk;
 /////
 
-/////Instruction register
+/////TAP Instruction register
 
 always @(posedge ckir or negedge taprst)
 begin
@@ -158,7 +154,23 @@ begin
 	      {ir[0],ir[3:1]} <= {tdi,ir[2:0]};
 	end
 end
-/////
+
+///Mbist instruction register
+always @(posedge ckdr or negedge taprst)
+begin
+	if(!taprst)
+		mbist_ir <= 11'b01110100000;
+	else begin
+	if(progmbist&sdr)
+		{mbist_ir[0],mbist_ir[10:1]} <= {tdi,mbist_ir[9:0]};
+	end
+end
+////////////////////////
+
+
+
+
+///////////////////////////////////
 
 always @(posedge clk or negedge rstp) begin //sample opcode
 	if(!rstp) begin

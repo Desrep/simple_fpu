@@ -27,7 +27,7 @@ module top_tb();
   logic tdi,tdo,tck,tms;
   logic [10:0] mbist_ir;
   logic [3:0] ir;
-  
+    
 
 
 
@@ -35,7 +35,6 @@ module top_tb();
  initial begin 
     //fill memory
     ir = BYPASS;
-    mbist_ir = 11'b01110100000;
     tms = 1;
     ///
 
@@ -151,7 +150,7 @@ module top_tb();
    @(posedge clk); //2
    #1
    @(negedge clk); 
-   tdi =0;
+   tdi =1;
    @(posedge clk); //3
     #1
    @(posedge clk); //4
@@ -167,10 +166,28 @@ module top_tb();
    tms =0;
    @(posedge clk); // idle
    @(negedge clk);
-   #20
-   //wait for mbist
-    mbist_ir =  11'b01110100010;
-    #1700
+   tms =1;
+   @(posedge clk); // select dr scan
+   @(negedge clk);
+   tms = 0;
+   @(posedge clk); // capture dr
+   @(posedge clk); // shift dr
+   //program mbist
+   mbist_ir = 11'b01110100010;
+   for(int i =0; i<11 ; i++) // program mbist
+   begin
+	@(negedge clk);
+	tdi = mbist_ir[10-i];
+	@(posedge clk);
+   end
+   @(negedge clk);
+   tms = 1;
+   @(posedge clk);//exit1 dr
+   @(posedge clk);//update
+   @(negedge clk);
+   tms = 0;
+   @(posedge clk);
+    #1700 // wait mbist
     $finish;
   end
 
@@ -180,7 +197,7 @@ module top_tb();
 
 
   
-  fpu  fpu1(.inexact(inxt),.addr1(addr1),.addr2(addr2),.addr3(addr3),.enable(enable),.ld(load_fp),.inp(in1),.out(out),.ov(ov),.un(un),.opcode_in(op),.clk(clk),.rstp(rst),.eq(eq),.great(great),.less(less),.round_mp(round_m),.act(act),.done(done),.inv(inv),.div_zero(dz),.test_mode(test_mode),.tdi(tdi),.tdo(tdo),.tck(clk),.mbist_inst_reg(mbist_ir),.tms(tms));
+  fpu  fpu1(.inexact(inxt),.addr1(addr1),.addr2(addr2),.addr3(addr3),.enable(enable),.ld(load_fp),.inp(in1),.out(out),.ov(ov),.un(un),.opcode_in(op),.clk(clk),.rstp(rst),.eq(eq),.great(great),.less(less),.round_mp(round_m),.act(act),.done(done),.inv(inv),.div_zero(dz),.test_mode(test_mode),.tdi(tdi),.tdo(tdo),.tck(clk),.tms(tms));
   
   
   
