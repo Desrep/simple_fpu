@@ -22,10 +22,14 @@
 `include "fp_comp.v"
 `include "fp_add.v"
 `include "fp_sqr.v"
-`include  "sram.v"
+`include  "sram_fault.v"
 `include "mbist.v"
 `include "tapc.v"
 `include "ir_decoder.v"
+
+
+`define SA0_FAULT   // uncoment to inyect a stuck at 0 fault in the sram for now
+//`define SA1_FAULT  // stuck at 1 fault inyection for sram
 
 module fpu(
 input clk,
@@ -47,7 +51,6 @@ input tdi,tms,tck,trst,tdo,
 output reg td,
 
 //debug por ahora
-input [3:0] ir,
 input [10:0] mbist_inst_reg
 
 
@@ -57,7 +60,21 @@ input [10:0] mbist_inst_reg
 
 localparam width = 32;
 localparam addr_width = 5;
- 
+
+localparam BYPASS = 4'b0000;
+localparam SAMPLE = 4'b0001;
+localparam PRELOAD = 4'b0010;
+localparam EXTEST = 4'b0011;
+localparam RUN_MBIST = 4'b0100;
+localparam RUNSCAN = 4'b0101;
+localparam INTEST = 4'b0110;
+localparam PROG_MBIST = 4'b0111;
+localparam PROG_LBIST = 4'b1001;
+localparam RUN_LBIST = 4'b1010;
+
+
+
+
 // fpu signals
 reg [31:0] out0;
 reg [31:0] in1pa,in2pa,in1pm,in2pm,in1pc,in2pc,in1pd,in2pd,in1ps,in1p,in2p;
@@ -83,6 +100,7 @@ wire sram_clk;
 
 // tap signals
 wire ckdr,sdr,usr,ckir,sir,uir,tapenable,taprst,tapselect;
+reg [3:0] ir;
 
 //mbist signals
 wire mbist_write, mbist_read,mbist_web;
@@ -129,6 +147,18 @@ assign csb1 = (runmbist)?1'b1:fpu_csb1;
 assign sram_clk = (runmbist)?tck:clk;
 /////
 
+/////Instruction register
+
+always @(posedge ckir or negedge taprst)
+begin
+	if(!taprst)
+		ir <= BYPASS;
+	else begin
+	    if(sir)
+	      {ir[0],ir[3:1]} <= {tdi,ir[2:0]};
+	end
+end
+/////
 
 always @(posedge clk or negedge rstp) begin //sample opcode
 	if(!rstp) begin

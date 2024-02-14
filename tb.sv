@@ -65,7 +65,6 @@ module top_tb();
     addr1 = 5'b00100;
     in1 = 32'b10111111111001100110011001100110;// 1.8
     #10
-    
     // load registers 
     addr1 = 5'b00000;
     enable = 1;
@@ -111,12 +110,6 @@ module top_tb();
    #30
     op = 3'b100;
    #30
-   /// start mbist
-   //////////////////////////////////////
-   ////////////////////////////////////
-   mbist_ir =  11'b01110100010;
-   ir = RUN_MBIST;
-   #1700
    /////Test tapc
    /////////////////////////////
    tms = 0;
@@ -126,35 +119,58 @@ module top_tb();
    tms = 0;
    @(posedge clk);
    #1
-   @(posedge clk);
-   #50
+   @(posedge clk);  //shift data
+   #45
+   @(negedge clk);
    tms =1;
-   @(posedge clk);
+   @(posedge clk); //exit1
    #1
-   @(posedge clk);
+   @(posedge clk); //update
    #1
    tms = 0;
-   @(posedge clk);
+   @(posedge clk); // idle
    #1
+   @(negedge clk);
    tms = 1;
-   @(posedge clk);
+   @(posedge clk); // select dr
    #1
-   @(posedge clk);
+   @(posedge clk); // select ir
+   #1
+   @(negedge clk);
    tms = 0;
-   @(posedge clk);
+   @(posedge clk);//capture ir
    #1
-   @(posedge clk);
-   #50
-   tms =1;
-   @(posedge clk);
+   @(posedge clk); // shift ir
    #1
-   @(posedge clk);
+   @(negedge  clk);
+   tdi = 0;
+   @(posedge clk); // 1
+   #1
+   @(negedge clk);
+   tdi = 1;
+   @(posedge clk); //2
+   #1
+   @(negedge clk); 
+   tdi =0;
+   @(posedge clk); //3
+    #1
+   @(posedge clk); //4
+   #1 
+   @(negedge clk);
+   tms = 1;
+   @(posedge clk); // exit1 ir
+   #1
+   
+   @(posedge clk); // update ir
+   #1
+   @(negedge clk);
    tms =0;
-   #1
-   @(posedge clk);
-   tms =1;
-   #40
-
+   @(posedge clk); // idle
+   @(negedge clk);
+   #20
+   //wait for mbist
+    mbist_ir =  11'b01110100010;
+    #1700
     $finish;
   end
 
@@ -164,12 +180,11 @@ module top_tb();
 
 
   
-  fpu  fpu1(.inexact(inxt),.addr1(addr1),.addr2(addr2),.addr3(addr3),.enable(enable),.ld(load_fp),.inp(in1),.out(out),.ov(ov),.un(un),.opcode_in(op),.clk(clk),.rstp(rst),.eq(eq),.great(great),.less(less),.round_mp(round_m),.act(act),.done(done),.inv(inv),.div_zero(dz),.test_mode(test_mode),.tdi(tdi),.tdo(tdo),.tck(clk),.ir(ir),.mbist_inst_reg(mbist_ir),.tms(tms));
+  fpu  fpu1(.inexact(inxt),.addr1(addr1),.addr2(addr2),.addr3(addr3),.enable(enable),.ld(load_fp),.inp(in1),.out(out),.ov(ov),.un(un),.opcode_in(op),.clk(clk),.rstp(rst),.eq(eq),.great(great),.less(less),.round_mp(round_m),.act(act),.done(done),.inv(inv),.div_zero(dz),.test_mode(test_mode),.tdi(tdi),.tdo(tdo),.tck(clk),.mbist_inst_reg(mbist_ir),.tms(tms));
   
   
   
   initial begin 
-    #1900	  
     $dumpfile("wave.vcd");
     $dumpvars(0);
   end
