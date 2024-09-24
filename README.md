@@ -8,7 +8,7 @@ The signals do the following
 | Singal | Type | Description |
 | --- | --- |---|
 | in1p | input | first operand |
-| in2p | input | first operand |
+| in2p | input | second operand |
 | rstp | input | reset signal |
 | clk  | input |The clock |
 | round_mp  | input | Rounding mode selector, the codes can be found in special_characters.v |
