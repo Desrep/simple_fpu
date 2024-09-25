@@ -27,15 +27,15 @@ The signals do the following
 
 The opcode is the operation is encoded as follows
 
-         00 = addition and compare
+         b00 = addition and compare
          
-         01 = multiplication
+         b01 = multiplication
          
-         10 = division
+         b10 = division
          
-         11 = square root
+         b11 = square root
 
-         100 = compare
+         b100 = compare
          
          
 For square root the operand used is only in1p
